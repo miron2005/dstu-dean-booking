@@ -1,0 +1,140 @@
+
+<header class="header">
+  <a class="logo" routerLink="/">
+    <img
+      src="/logo-dgtu.png"
+      alt="Логотип ДГТУ"
+      class="logo-image"
+    >
+
+    <span class="logo-text">
+      <strong>ДОНСКОЙ ГОСУДАРСТВЕННЫЙ</strong>
+      <strong>ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ</strong>
+    </span>
+  </a>
+
+  <nav class="navigation">
+    <a href="#about">О сервисе</a>
+    <a href="#how">Как записаться</a>
+    <a routerLink="/login" class="login-button">Войти</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-heading">
+        <span class="label">ЭЛЕКТРОННЫЕ СЕРВИСЫ ДГТУ</span>
+
+        <h1>
+          Электронная запись<br>
+          на приём в деканат
+        </h1>
+
+        <p class="description">
+          Сервис предварительной записи студентов
+          на приём к сотрудникам деканата.
+          Выберите тему обращения и удобное время
+          для посещения.
+        </p>
+      </div>
+
+      <div class="service-grid">
+        <a routerLink="/login" class="service-tile">
+          <svg class="tile-icon" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path d="M16 3v4M8 3v4M3 10h18"/>
+            <path d="M12 13v5M9.5 15.5h5"/>
+          </svg>
+          <span>Записаться на приём</span>
+        </a>
+
+        <a routerLink="/login" class="service-tile">
+          <svg class="tile-icon" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path d="M16 3v4M8 3v4M3 10h18"/>
+            <path d="m9 15 2 2 4-4"/>
+          </svg>
+          <span>Мои записи</span>
+        </a>
+
+        <a href="#how" class="service-tile">
+          <svg class="tile-icon" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 6h11M9 12h11M9 18h11"/>
+            <path d="m3 6 1.5 1.5L6.5 5"/>
+            <path d="m3 12 1.5 1.5 2-2.5"/>
+            <path d="m3 18 1.5 1.5 2-2.5"/>
+          </svg>
+          <span>Как это работает</span>
+        </a>
+
+        <a href="#about" class="service-tile">
+          <svg class="tile-icon" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 11v5"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          <span>О сервисе</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section" id="how">
+    <div class="section-heading">
+      <span class="label">ПОРЯДОК ЗАПИСИ</span>
+      <h2>Как записаться на приём?</h2>
+      <p>
+        Для оформления записи потребуется выполнить
+        три простых действия.
+      </p>
+    </div>
+
+    <div class="steps">
+      <article class="step">
+        <span class="step-number">01</span>
+        <h3>Авторизуйтесь</h3>
+        <p>
+          Войдите в систему под своей учётной записью.
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step-number">02</span>
+        <h3>Выберите параметры</h3>
+        <p>
+          Укажите тему обращения и подходящий
+          временной интервал.
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step-number">03</span>
+        <h3>Подтвердите запись</h3>
+        <p>
+          Проверьте данные и сохраните информацию
+          о предстоящем приёме.
+        </p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" id="about">
+  <span>Донской государственный технический университет</span>
+  <span>Электронная запись на приём в деканат</span>
+</footer>
