@@ -1,20 +1,14 @@
 
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpParams,
-} from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 
-// Факультет
 export interface Faculty {
   id: number;
   name: string;
   is_active: boolean;
 }
 
-// Пользователь
 export interface User {
   id: number;
   full_name: string;
@@ -24,7 +18,6 @@ export interface User {
   is_active: boolean;
 }
 
-// Создание пользователя
 export interface UserCreate {
   full_name: string;
   email: string;
@@ -33,7 +26,6 @@ export interface UserCreate {
   faculty_id: number | null;
 }
 
-// Изменение пользователя
 export interface UserUpdate {
   full_name?: string;
   role?: 'student' | 'secretary' | 'dean' | 'admin';
@@ -41,18 +33,15 @@ export interface UserUpdate {
   is_active?: boolean;
 }
 
-// Создание факультета
 export interface FacultyCreate {
   name: string;
 }
 
-// Изменение факультета
 export interface FacultyUpdate {
   name?: string;
   is_active?: boolean;
 }
 
-// Данные регистрации
 export interface RegisterData {
   full_name: string;
   email: string;
@@ -60,13 +49,11 @@ export interface RegisterData {
   faculty_id: number;
 }
 
-// Ответ авторизации
 export interface TokenResponse {
   access_token: string;
   token_type: string;
 }
 
-// Приёмный период
 export interface ReceptionPeriod {
   id: number;
   faculty_id: number;
@@ -78,7 +65,20 @@ export interface ReceptionPeriod {
   status: string;
 }
 
-// Запись студента в очереди
+export interface PeriodCreate {
+  dean_id: number;
+  starts_at: string;
+  ends_at: string;
+  capacity: number;
+}
+
+export interface PeriodUpdate {
+  dean_id?: number;
+  starts_at?: string;
+  ends_at?: string;
+  capacity?: number;
+}
+
 export interface QueueItem {
   id: number;
   period_id: number;
@@ -91,7 +91,6 @@ export interface QueueItem {
   result_comment: string | null;
 }
 
-// Результат приёма
 export interface AppointmentResult {
   status: 'accepted' | 'no_show';
   result_comment: string | null;
@@ -101,96 +100,38 @@ export interface AppointmentResult {
   providedIn: 'root',
 })
 export class ApiService {
-  private http = inject(HttpClient);
-
-  private readonly apiUrl = 'http://127.0.0.1:8000';
+  private readonly baseUrl = 'http://127.0.0.1:8000';
+  private readonly http = inject(HttpClient);
   private readonly tokenKey = 'deanery_access_token';
 
-  // ФАКУЛЬТЕТЫ
-
-  getFaculties(): Observable<Faculty[]> {
-    return this.http.get<Faculty[]>(`${this.apiUrl}/faculties`);
-  }
-
-  createFaculty(data: FacultyCreate): Observable<Faculty> {
-    return this.http.post<Faculty>(
-      `${this.apiUrl}/faculties`,
-      data,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  updateFaculty(
-    id: number,
-    data: FacultyUpdate,
-  ): Observable<Faculty> {
-    return this.http.patch<Faculty>(
-      `${this.apiUrl}/faculties/${id}`,
-      data,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  // ПОЛЬЗОВАТЕЛИ
-
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(
-      `${this.apiUrl}/users`,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  createUser(data: UserCreate): Observable<User> {
-    return this.http.post<User>(
-      `${this.apiUrl}/users`,
-      data,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  updateUser(id: number, data: UserUpdate): Observable<User> {
-    return this.http.patch<User>(
-      `${this.apiUrl}/users/${id}`,
-      data,
-      { headers: this.getAuthHeaders() },
-    );
-  }
-
-  // РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
+  // Авторизация
 
   register(data: RegisterData): Observable<User> {
     return this.http.post<User>(
-      `${this.apiUrl}/auth/register`,
+      `${this.baseUrl}/auth/register`,
       data,
     );
   }
 
-  login(
-    email: string,
-    password: string,
-  ): Observable<TokenResponse> {
-    const body = new HttpParams()
-      .set('username', email)
-      .set('password', password);
+  login(email: string, password: string): Observable<TokenResponse> {
+    const body = new URLSearchParams();
+    body.set('username', email);
+    body.set('password', password);
 
     return this.http.post<TokenResponse>(
-      `${this.apiUrl}/auth/login`,
+      `${this.baseUrl}/auth/login`,
       body.toString(),
       {
         headers: new HttpHeaders({
           'Content-Type': 'application/x-www-form-urlencoded',
         }),
       },
-    ).pipe(
-      tap((response) => {
-        localStorage.setItem(this.tokenKey, response.access_token);
-      }),
     );
   }
 
   getMe(): Observable<User> {
     return this.http.get<User>(
-      `${this.apiUrl}/auth/me`,
+      `${this.baseUrl}/auth/me`,
       { headers: this.getAuthHeaders() },
     );
   }
@@ -203,25 +144,109 @@ export class ApiService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  // КАБИНЕТ ДЕКАНА
+  // Факультеты
 
-  getPeriods(): Observable<ReceptionPeriod[]> {
-    return this.http.get<ReceptionPeriod[]>(
-      `${this.apiUrl}/periods`,
+  getFaculties(): Observable<Faculty[]> {
+    return this.http.get<Faculty[]>(
+      `${this.baseUrl}/faculties`,
+    );
+  }
+
+  createFaculty(data: FacultyCreate): Observable<Faculty> {
+    return this.http.post<Faculty>(
+      `${this.baseUrl}/faculties`,
+      data,
       { headers: this.getAuthHeaders() },
     );
   }
 
+  updateFaculty(
+    id: number,
+    data: FacultyUpdate,
+  ): Observable<Faculty> {
+    return this.http.patch<Faculty>(
+      `${this.baseUrl}/faculties/${id}`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Пользователи
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(
+      `${this.baseUrl}/users`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  createUser(data: UserCreate): Observable<User> {
+    return this.http.post<User>(
+      `${this.baseUrl}/users`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  updateUser(
+    id: number,
+    data: UserUpdate,
+  ): Observable<User> {
+    return this.http.patch<User>(
+      `${this.baseUrl}/users/${id}`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Приёмные периоды
+
+  getPeriods(): Observable<ReceptionPeriod[]> {
+    return this.http.get<ReceptionPeriod[]>(
+      `${this.baseUrl}/periods`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  createPeriod(data: PeriodCreate): Observable<ReceptionPeriod> {
+    return this.http.post<ReceptionPeriod>(
+      `${this.baseUrl}/periods`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  updatePeriod(
+    id: number,
+    data: PeriodUpdate,
+  ): Observable<ReceptionPeriod> {
+    return this.http.patch<ReceptionPeriod>(
+      `${this.baseUrl}/periods/${id}`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  cancelPeriod(id: number): Observable<ReceptionPeriod> {
+    return this.http.post<ReceptionPeriod>(
+      `${this.baseUrl}/periods/${id}/cancel`,
+      {},
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Очередь студентов — для декана
+
   getQueue(periodId: number): Observable<QueueItem[]> {
     return this.http.get<QueueItem[]>(
-      `${this.apiUrl}/periods/${periodId}/queue`,
+      `${this.baseUrl}/periods/${periodId}/queue`,
       { headers: this.getAuthHeaders() },
     );
   }
 
   callNext(periodId: number): Observable<QueueItem> {
     return this.http.post<QueueItem>(
-      `${this.apiUrl}/periods/${periodId}/call-next`,
+      `${this.baseUrl}/periods/${periodId}/call-next`,
       {},
       { headers: this.getAuthHeaders() },
     );
@@ -232,17 +257,19 @@ export class ApiService {
     data: AppointmentResult,
   ): Observable<QueueItem> {
     return this.http.patch<QueueItem>(
-      `${this.apiUrl}/appointments/${appointmentId}/result`,
+      `${this.baseUrl}/appointments/${appointmentId}/result`,
       data,
       { headers: this.getAuthHeaders() },
     );
   }
 
-  // ЗАГОЛОВКИ АВТОРИЗАЦИИ
+  // Заголовки авторизации
 
   private getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+
     return new HttpHeaders({
-      Authorization: `Bearer ${this.getToken() ?? ''}`,
+      Authorization: `Bearer ${token}`,
     });
   }
 }
