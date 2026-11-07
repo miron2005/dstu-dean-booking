@@ -1,0 +1,580 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: #292d35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f5f8;
+}
+
+/* Боковое меню */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 25px 18px;
+  background: #252a32;
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 8px 30px;
+}
+
+.logo img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.logo strong,
+.logo span {
+  display: block;
+}
+
+.logo strong {
+  font-size: 19px;
+}
+
+.logo span {
+  margin-top: 5px;
+  color: #b9bdc5;
+  font-size: 11px;
+}
+
+.sidebar-title {
+  margin: 15px 10px 12px;
+  color: #9299a5;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  color: #d5d8de;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.nav-item span {
+  width: 20px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: white;
+  background: #a98242;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 25px;
+}
+
+/* Основная область */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 1600px;
+  padding: 30px 38px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.breadcrumb {
+  color: #858b96;
+  font-size: 12px;
+}
+
+.topbar h1 {
+  margin: 9px 0 0;
+  font-size: 26px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.notification-button {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  background: white;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d49a36;
+}
+
+.user-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #eee3d0;
+  color: #8a672f;
+  font-weight: bold;
+}
+
+.user-mini strong,
+.user-mini span {
+  display: block;
+}
+
+.user-mini strong {
+  font-size: 13px;
+}
+
+.user-mini span {
+  margin-top: 4px;
+  color: #858b96;
+  font-size: 12px;
+}
+
+/* Приветственный блок */
+.welcome {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 155px;
+  padding: 30px 35px;
+  margin-bottom: 25px;
+  border-radius: 14px;
+  color: white;
+  background: linear-gradient(115deg, #34312d, #675035);
+}
+
+.welcome-label {
+  color: #e5c58e;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.welcome h2 {
+  margin: 14px 0 9px;
+  font-size: 25px;
+}
+
+.welcome p {
+  max-width: 600px;
+  margin: 0;
+  color: #e6e0d8;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.welcome-decoration {
+  position: absolute;
+  right: 35px;
+  color: rgba(255, 255, 255, 0.08);
+  font-size: 70px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+/* Статистика */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(30, 40, 60, 0.035);
+}
+
+.stat-icon {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 19px;
+}
+
+.gold { background: #f8eedc; color: #a98242; }
+.green { background: #e4f4eb; color: #319b63; }
+.blue { background: #e7effc; color: #4b79c5; }
+.orange { background: #fff0e3; color: #d88a3b; }
+
+.stat-card span,
+.stat-card strong,
+.stat-card small {
+  display: block;
+}
+
+.stat-card span {
+  color: #777e89;
+  font-size: 12px;
+}
+
+.stat-card strong {
+  margin: 5px 0;
+  font-size: 25px;
+}
+
+.stat-card small {
+  color: #9a9faa;
+  font-size: 11px;
+}
+
+/* Секции */
+.section {
+  margin-bottom: 30px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 16px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.section-heading p {
+  margin: 6px 0 0;
+  color: #858b96;
+  font-size: 13px;
+}
+
+.section-heading a {
+  color: #a47b3b;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+/* Карточка приёма */
+.appointment-card {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 22px;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 12px;
+}
+
+.appointment-date {
+  width: 75px;
+  min-width: 75px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  background: #f7f0e5;
+  color: #967039;
+}
+
+.appointment-date span,
+.appointment-date strong,
+.appointment-date small {
+  display: block;
+}
+
+.appointment-date span,
+.appointment-date small {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.appointment-date strong {
+  margin: 5px 0;
+  font-size: 29px;
+}
+
+.appointment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.status {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+.confirmed {
+  color: #278354;
+  background: #e5f5eb;
+}
+
+.appointment-info h3 {
+  margin: 10px 0 7px;
+  font-size: 16px;
+}
+
+.appointment-info p {
+  margin: 0;
+  color: #858b96;
+  font-size: 13px;
+}
+
+.appointment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 13px;
+  color: #747b86;
+  font-size: 12px;
+}
+
+.outline-button {
+  padding: 10px 16px;
+  border: 1px solid #b18b50;
+  border-radius: 7px;
+  color: #99723b;
+  background: white;
+  cursor: pointer;
+}
+
+.outline-button:hover {
+  color: white;
+  background: #a98242;
+}
+
+/* Быстрые действия */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.action-card {
+  display: block;
+  padding: 22px;
+  color: inherit;
+  text-decoration: none;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(30, 40, 60, 0.08);
+}
+
+.action-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #a98242;
+  background: #f7f0e5;
+  font-size: 22px;
+}
+
+.action-card h3 {
+  margin: 16px 0 8px;
+  font-size: 16px;
+}
+
+.action-card p {
+  min-height: 36px;
+  margin: 0 0 15px;
+  color: #858b96;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.action-card > span {
+  color: #a98242;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* Уведомления */
+.notifications-list {
+  padding: 5px 20px;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 12px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 17px 0;
+  border-bottom: 1px solid #eeeef1;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #a98242;
+  background: #f7f0e5;
+}
+
+.notification-item strong {
+  font-size: 13px;
+}
+
+.notification-item p {
+  margin: 5px 0;
+  color: #747b86;
+  font-size: 12px;
+}
+
+.notification-item small {
+  color: #a0a5ae;
+  font-size: 11px;
+}
+
+/* Подвал */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 20px 0 5px;
+  border-top: 1px solid #e3e5e9;
+  color: #9298a2;
+  font-size: 11px;
+}
+
+/* Адаптация */
+@media (max-width: 1100px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    width: 210px;
+    min-width: 210px;
+  }
+
+  .main-content {
+    padding: 22px;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    min-height: auto;
+  }
+
+  .sidebar-bottom {
+    margin-top: 10px;
+  }
+
+  .main-content {
+    padding: 18px 14px;
+  }
+
+  .topbar,
+  .topbar-right {
+    flex-wrap: wrap;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 13px;
+  }
+
+  .appointment-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}

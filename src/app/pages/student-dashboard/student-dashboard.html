@@ -1,0 +1,236 @@
+
+<div class="dashboard">
+
+  <!-- Боковая панель -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/logo-dgtu.png" alt="ДГТУ">
+      <div>
+        <strong>ДГТУ</strong>
+        <span>Электронная запись</span>
+      </div>
+    </div>
+
+    <div class="sidebar-title">МЕНЮ</div>
+
+    <nav class="navigation">
+      <a routerLink="/student" class="nav-item active">
+        <span>▦</span> Главная
+      </a>
+
+      <a href="#appointments" class="nav-item">
+        <span>▣</span> Мои записи
+      </a>
+
+      <a routerLink="/student/new-appointment" class="nav-item">
+        <span>＋</span> Записаться на приём
+      </a>
+
+      <a href="#notifications" class="nav-item">
+        <span>♧</span> Уведомления
+      </a>
+
+      <a href="#profile" class="nav-item">
+        <span>♙</span> Мой профиль
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a routerLink="/" class="nav-item">
+        <span>↩</span> Выйти
+      </a>
+    </div>
+  </aside>
+
+  <!-- Основная часть -->
+  <main class="main-content">
+
+    <header class="topbar">
+      <div>
+        <span class="breadcrumb">Личный кабинет / Главная</span>
+        <h1>Личный кабинет</h1>
+      </div>
+
+      <div class="topbar-right">
+        <button class="notification-button" aria-label="Уведомления">
+          ♧
+          <span class="notification-dot"></span>
+        </button>
+
+        <div class="user-mini">
+          <div class="avatar">ИП</div>
+          <div>
+            <strong>Иван Петров</strong>
+            <span>Студент</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Приветственный блок -->
+    <section class="welcome">
+      <div>
+        <span class="welcome-label">ЭЛЕКТРОННАЯ ЗАПИСЬ К ДЕКАНУ</span>
+        <h2>Здравствуйте, Иван!</h2>
+        <p>
+          Здесь вы можете записаться на приём, следить за своими
+          обращениями и получать уведомления.
+        </p>
+      </div>
+
+      <div class="welcome-decoration">ДГТУ</div>
+    </section>
+
+    <!-- Статистика -->
+    <section class="stats">
+
+      <article class="stat-card">
+        <div class="stat-icon gold">▣</div>
+        <div>
+          <span>Всего записей</span>
+          <strong>5</strong>
+          <small>За всё время</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon green">✓</div>
+        <div>
+          <span>Предстоящие</span>
+          <strong>1</strong>
+          <small>Ожидают приёма</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon blue">◷</div>
+        <div>
+          <span>Завершённые</span>
+          <strong>4</strong>
+          <small>Приёмы состоялись</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon orange">♧</div>
+        <div>
+          <span>Уведомления</span>
+          <strong>2</strong>
+          <small>Непрочитанные</small>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Ближайший приём -->
+    <section class="section" id="appointments">
+      <div class="section-heading">
+        <div>
+          <h2>Ближайший приём</h2>
+          <p>Информация о вашей следующей встрече</p>
+        </div>
+
+        <a href="#all-appointments">Все записи →</a>
+      </div>
+
+      <article class="appointment-card">
+        <div class="appointment-date">
+          <span>НОЯ</span>
+          <strong>12</strong>
+          <small>ЧЕТВЕРГ</small>
+        </div>
+
+        <div class="appointment-info">
+          <span class="status confirmed">Подтверждена</span>
+          <h3>Консультация по учебному вопросу</h3>
+          <p>Факультет информационных технологий</p>
+
+          <div class="appointment-meta">
+            <span>◷ 14:30</span>
+            <span>♙ Приём у декана</span>
+          </div>
+        </div>
+
+        <div class="appointment-action">
+          <button class="outline-button">Подробнее</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Быстрые действия -->
+    <section class="section" id="new-appointment">
+      <div class="section-heading">
+        <div>
+          <h2>Быстрые действия</h2>
+          <p>Основные возможности личного кабинета</p>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+
+        <a routerLink="/student/new-appointment" class="action-card">
+          <div class="action-icon">＋</div>
+          <h3>Новая запись</h3>
+          <p>Выберите тему и удобное время приёма</p>
+          <span>Перейти →</span>
+        </a>
+
+        <a href="#all-appointments" class="action-card">
+          <div class="action-icon">▣</div>
+          <h3>Мои записи</h3>
+          <p>Просматривайте историю обращений</p>
+          <span>Перейти →</span>
+        </a>
+
+        <a href="#notifications" class="action-card">
+          <div class="action-icon">♧</div>
+          <h3>Уведомления</h3>
+          <p>Следите за изменениями ваших записей</p>
+          <span>Перейти →</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Уведомления -->
+    <section class="section" id="notifications">
+      <div class="section-heading">
+        <div>
+          <h2>Последние уведомления</h2>
+          <p>Важная информация о ваших обращениях</p>
+        </div>
+
+        <a href="#notifications">Все уведомления →</a>
+      </div>
+
+      <div class="notifications-list">
+
+        <article class="notification-item">
+          <div class="notification-icon">✓</div>
+          <div>
+            <strong>Запись подтверждена</strong>
+            <p>Ваша запись на приём успешно подтверждена.</p>
+            <small>Сегодня, 10:35</small>
+          </div>
+        </article>
+
+        <article class="notification-item">
+          <div class="notification-icon">♧</div>
+          <div>
+            <strong>Напоминание о приёме</strong>
+            <p>Не забудьте посетить деканат в назначенное время.</p>
+            <small>Вчера, 16:20</small>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer class="footer">
+      <span>© ДГТУ — Система электронной записи</span>
+      <span>Личный кабинет студента</span>
+    </footer>
+
+  </main>
+</div>
