@@ -24,6 +24,34 @@ export interface User {
   is_active: boolean;
 }
 
+// Создание пользователя
+export interface UserCreate {
+  full_name: string;
+  email: string;
+  password: string;
+  role: 'student' | 'secretary' | 'dean' | 'admin';
+  faculty_id: number | null;
+}
+
+// Изменение пользователя
+export interface UserUpdate {
+  full_name?: string;
+  role?: 'student' | 'secretary' | 'dean' | 'admin';
+  faculty_id?: number | null;
+  is_active?: boolean;
+}
+
+// Создание факультета
+export interface FacultyCreate {
+  name: string;
+}
+
+// Изменение факультета
+export interface FacultyUpdate {
+  name?: string;
+  is_active?: boolean;
+}
+
 // Данные регистрации
 export interface RegisterData {
   full_name: string;
@@ -78,19 +106,57 @@ export class ApiService {
   private readonly apiUrl = 'http://127.0.0.1:8000';
   private readonly tokenKey = 'deanery_access_token';
 
-  // -------------------------
   // ФАКУЛЬТЕТЫ
-  // -------------------------
 
   getFaculties(): Observable<Faculty[]> {
-    return this.http.get<Faculty[]>(
+    return this.http.get<Faculty[]>(`${this.apiUrl}/faculties`);
+  }
+
+  createFaculty(data: FacultyCreate): Observable<Faculty> {
+    return this.http.post<Faculty>(
       `${this.apiUrl}/faculties`,
+      data,
+      { headers: this.getAuthHeaders() },
     );
   }
 
-  // -------------------------
+  updateFaculty(
+    id: number,
+    data: FacultyUpdate,
+  ): Observable<Faculty> {
+    return this.http.patch<Faculty>(
+      `${this.apiUrl}/faculties/${id}`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // ПОЛЬЗОВАТЕЛИ
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(
+      `${this.apiUrl}/users`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  createUser(data: UserCreate): Observable<User> {
+    return this.http.post<User>(
+      `${this.apiUrl}/users`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  updateUser(id: number, data: UserUpdate): Observable<User> {
+    return this.http.patch<User>(
+      `${this.apiUrl}/users/${id}`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   // РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
-  // -------------------------
 
   register(data: RegisterData): Observable<User> {
     return this.http.post<User>(
@@ -117,10 +183,7 @@ export class ApiService {
       },
     ).pipe(
       tap((response) => {
-        localStorage.setItem(
-          this.tokenKey,
-          response.access_token,
-        );
+        localStorage.setItem(this.tokenKey, response.access_token);
       }),
     );
   }
@@ -128,9 +191,7 @@ export class ApiService {
   getMe(): Observable<User> {
     return this.http.get<User>(
       `${this.apiUrl}/auth/me`,
-      {
-        headers: this.getAuthHeaders(),
-      },
+      { headers: this.getAuthHeaders() },
     );
   }
 
@@ -142,42 +203,30 @@ export class ApiService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  // -------------------------
   // КАБИНЕТ ДЕКАНА
-  // -------------------------
 
-  // Получить приёмные периоды
   getPeriods(): Observable<ReceptionPeriod[]> {
     return this.http.get<ReceptionPeriod[]>(
       `${this.apiUrl}/periods`,
-      {
-        headers: this.getAuthHeaders(),
-      },
+      { headers: this.getAuthHeaders() },
     );
   }
 
-  // Получить очередь выбранного периода
   getQueue(periodId: number): Observable<QueueItem[]> {
     return this.http.get<QueueItem[]>(
       `${this.apiUrl}/periods/${periodId}/queue`,
-      {
-        headers: this.getAuthHeaders(),
-      },
+      { headers: this.getAuthHeaders() },
     );
   }
 
-  // Вызвать следующего студента
   callNext(periodId: number): Observable<QueueItem> {
     return this.http.post<QueueItem>(
       `${this.apiUrl}/periods/${periodId}/call-next`,
       {},
-      {
-        headers: this.getAuthHeaders(),
-      },
+      { headers: this.getAuthHeaders() },
     );
   }
 
-  // Зафиксировать результат приёма
   setAppointmentResult(
     appointmentId: number,
     data: AppointmentResult,
@@ -185,15 +234,11 @@ export class ApiService {
     return this.http.patch<QueueItem>(
       `${this.apiUrl}/appointments/${appointmentId}/result`,
       data,
-      {
-        headers: this.getAuthHeaders(),
-      },
+      { headers: this.getAuthHeaders() },
     );
   }
 
-  // -------------------------
   // ЗАГОЛОВКИ АВТОРИЗАЦИИ
-  // -------------------------
 
   private getAuthHeaders(): HttpHeaders {
     return new HttpHeaders({

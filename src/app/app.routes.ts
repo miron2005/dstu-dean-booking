@@ -10,6 +10,7 @@ import { NewAppointment } from './pages/new-appointment/new-appointment';
 import { MyAppointments } from './pages/my-appointments/my-appointments';
 
 import { DeanDashboard } from './pages/dean-dashboard/dean-dashboard';
+import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -25,6 +26,9 @@ export const routes: Routes = [
 
   // Кабинет декана
   { path: 'dean', component: DeanDashboard },
+
+  // Кабинет администратора
+  { path: 'admin', component: AdminDashboard },
 
   // Неизвестные адреса
   { path: '**', redirectTo: '' },
