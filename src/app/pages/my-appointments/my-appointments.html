@@ -1,0 +1,171 @@
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/logo-dgtu.png" alt="ДГТУ">
+      <div>
+        <strong>ДГТУ</strong>
+        <span>Электронная приёмная</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a routerLink="/student">Главная</a>
+      <a routerLink="/student/my-appointments" class="active">Мои записи</a>
+      <a routerLink="/student/new-appointment">Записаться на приём</a>
+      <a href="javascript:void(0)">Уведомления</a>
+      <a href="javascript:void(0)">Мой профиль</a>
+    </nav>
+
+    <a routerLink="/login" class="logout">Выйти</a>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <div>
+        <span class="topbar-label">Личный кабинет студента</span>
+        <h1>Мои записи</h1>
+      </div>
+      <div class="user-info">
+        <div class="avatar">ИП</div>
+        <div>
+          <strong>Иван Петров</strong>
+          <span>Студент</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-heading">
+      <div>
+        <h2>История приёмов</h2>
+        <p>Здесь собраны ваши текущие и прошедшие записи на приём.</p>
+      </div>
+      <a routerLink="/student/new-appointment" class="new-button">
+        + Новая запись
+      </a>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <span>Всего записей</span>
+        <strong>5</strong>
+      </div>
+      <div class="stat-card">
+        <span>Предстоящие</span>
+        <strong>2</strong>
+      </div>
+      <div class="stat-card">
+        <span>Завершённые</span>
+        <strong>2</strong>
+      </div>
+      <div class="stat-card">
+        <span>Отменённые</span>
+        <strong>1</strong>
+      </div>
+    </section>
+
+    <section class="appointments-card">
+      <div class="section-header">
+        <div>
+          <h2>Список записей</h2>
+          <p>Информация о ваших обращениях в деканат</p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <button class="filter active">Все записи</button>
+        <button class="filter">Предстоящие</button>
+        <button class="filter">Завершённые</button>
+        <button class="filter">Отменённые</button>
+      </div>
+
+      <div class="appointment-list">
+
+        <article class="appointment">
+          <div class="date-block">
+            <strong>12</strong>
+            <span>ноября</span>
+          </div>
+          <div class="appointment-info">
+            <h3>Вопрос по учебному плану</h3>
+            <p>Деканат факультета информационных технологий</p>
+            <div class="appointment-meta">
+              <span>10:30</span>
+              <span>Личный приём</span>
+            </div>
+          </div>
+          <div class="appointment-actions">
+            <span class="status pending">Ожидает приёма</span>
+            <button class="details-button">Подробнее</button>
+          </div>
+        </article>
+
+        <article class="appointment">
+          <div class="date-block">
+            <strong>15</strong>
+            <span>ноября</span>
+          </div>
+          <div class="appointment-info">
+            <h3>Академическая задолженность</h3>
+            <p>Деканат факультета информационных технологий</p>
+            <div class="appointment-meta">
+              <span>14:00</span>
+              <span>Личный приём</span>
+            </div>
+          </div>
+          <div class="appointment-actions">
+            <span class="status confirmed">Подтверждена</span>
+            <button class="details-button">Подробнее</button>
+          </div>
+        </article>
+
+        <article class="appointment">
+          <div class="date-block">
+            <strong>28</strong>
+            <span>октября</span>
+          </div>
+          <div class="appointment-info">
+            <h3>Получение справки</h3>
+            <p>Деканат факультета информационных технологий</p>
+            <div class="appointment-meta">
+              <span>11:00</span>
+              <span>Личный приём</span>
+            </div>
+          </div>
+          <div class="appointment-actions">
+            <span class="status completed">Завершена</span>
+            <button class="details-button">Подробнее</button>
+          </div>
+        </article>
+
+        <article class="appointment">
+          <div class="date-block">
+            <strong>20</strong>
+            <span>октября</span>
+          </div>
+          <div class="appointment-info">
+            <h3>Перевод на другую форму обучения</h3>
+            <p>Деканат факультета информационных технологий</p>
+            <div class="appointment-meta">
+              <span>12:30</span>
+              <span>Личный приём</span>
+            </div>
+          </div>
+          <div class="appointment-actions">
+            <span class="status cancelled">Отменена</span>
+            <button class="details-button">Подробнее</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <footer class="footer">
+      © ДГТУ — Электронная приёмная
+    </footer>
+
+  </main>
+</div>
+
