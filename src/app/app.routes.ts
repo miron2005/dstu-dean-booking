@@ -8,6 +8,7 @@ import { Register } from './pages/register/register';
 import { StudentDashboard } from './pages/student-dashboard/student-dashboard';
 import { NewAppointment } from './pages/new-appointment/new-appointment';
 import { MyAppointments } from './pages/my-appointments/my-appointments';
+import { SecretaryDashboard } from './pages/secretary-dashboard/secretary-dashboard';
 
 import { DeanDashboard } from './pages/dean-dashboard/dean-dashboard';
 import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
@@ -30,6 +31,8 @@ export const routes: Routes = [
   // Кабинет администратора
   { path: 'admin', component: AdminDashboard },
 
+  // Кабинет секретаря
+  { path: 'secretary', component: SecretaryDashboard },
   // Неизвестные адреса
   { path: '**', redirectTo: '' },
 ];
