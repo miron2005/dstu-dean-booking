@@ -24,14 +24,18 @@
         чтобы записываться на приём в деканат.
       </p>
 
-      <form>
+      <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+
         <div class="form-group">
           <label for="full_name">ФИО</label>
           <input
             type="text"
             id="full_name"
+            name="fullName"
+            [(ngModel)]="fullName"
             placeholder="Иванов Иван Иванович"
             autocomplete="name"
+            required
           >
         </div>
 
@@ -40,17 +44,32 @@
           <input
             type="email"
             id="email"
+            name="email"
+            [(ngModel)]="email"
             placeholder="example@mail.ru"
             autocomplete="email"
+            required
           >
         </div>
 
         <div class="form-group">
           <label for="faculty">Факультет</label>
-          <select id="faculty">
-            <option value="" disabled selected>
-              Выберите факультет
+
+          <select
+            id="faculty"
+            name="facultyId"
+            [(ngModel)]="facultyId"
+            required
+          >
+            <option [ngValue]="null" disabled>
+              {{ loadingFaculties ? 'Загрузка факультетов...' : 'Выберите факультет' }}
             </option>
+
+            @for (faculty of faculties; track faculty.id) {
+              <option [ngValue]="faculty.id">
+                {{ faculty.name }}
+              </option>
+            }
           </select>
         </div>
 
@@ -59,8 +78,12 @@
           <input
             type="password"
             id="password"
+            name="password"
+            [(ngModel)]="password"
             placeholder="Придумайте пароль"
             autocomplete="new-password"
+            required
+            minlength="8"
           >
         </div>
 
@@ -69,13 +92,28 @@
           <input
             type="password"
             id="confirm_password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
             placeholder="Повторите пароль"
             autocomplete="new-password"
+            required
           >
         </div>
 
-        <button type="submit" class="submit-button">
-          Зарегистрироваться
+        @if (errorMessage) {
+          <p class="form-error">{{ errorMessage }}</p>
+        }
+
+        @if (successMessage) {
+          <p class="form-success">{{ successMessage }}</p>
+        }
+
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="loading || loadingFaculties || !registerForm.valid"
+        >
+          {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
         </button>
       </form>
 
