@@ -1,13 +1,28 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Appointment
+from app.models import Appointment, ReceptionPeriod
 
 
 class AppointmentRepository:
     @classmethod
     def get_one(cls, appointment_id: int, session: Session):
         return session.get(Appointment, appointment_id)
+
+    @classmethod
+    def get_all(cls, faculty_id: int | None, period_id: int | None, status: str | None, session: Session):
+        query = (
+            select(Appointment)
+            .join(ReceptionPeriod, ReceptionPeriod.id == Appointment.period_id)
+            .order_by(Appointment.period_id, Appointment.queue_number)
+        )
+        if faculty_id is not None:
+            query = query.where(ReceptionPeriod.faculty_id == faculty_id)
+        if period_id is not None:
+            query = query.where(Appointment.period_id == period_id)
+        if status is not None:
+            query = query.where(Appointment.status == status)
+        return session.scalars(query).all()
 
     @classmethod
     def get_by_student(cls, student_id: int, session: Session):
