@@ -18,6 +18,11 @@ class SAppointmentResult(BaseModel):
     result_comment: str | None = None
 
 
+class SAppointmentStatus(BaseModel):
+    status: Literal["called", "accepted", "no_show", "cancelled"]
+    result_comment: str | None = None
+
+
 class SAppointment(SAppointmentBase):
     id: int
     queue_number: int
