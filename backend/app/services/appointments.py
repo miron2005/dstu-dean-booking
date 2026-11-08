@@ -1,38 +1,33 @@
 from datetime import datetime, timezone
 
-from fastapi import HTTPException
-from sqlalchemy import select
+from fastapi import HTTPException, status
 
-from app.models import Appointment, AppealTopic, Notification, ReceptionPeriod
-from app.services.periods import count_taken
+from app.models import Appointment
+from app.repositories import (
+    AppointmentRepository,
+    NotificationRepository,
+    PeriodRepository,
+    TopicRepository,
+)
 
 
-def create_appointment(db, student, data):
-    period = db.scalar(
-        select(ReceptionPeriod).where(ReceptionPeriod.id == data.period_id).with_for_update()
-    )
+def create_appointment(session, student, data):
+    period = PeriodRepository.get_one(data.period_id, session, for_update=True)
     if period is None or period.faculty_id != student.faculty_id:
-        raise HTTPException(404, "Период не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Период не найден")
     if period.status != "open":
-        raise HTTPException(400, "Период отменён")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Период отменён")
     if datetime.now(timezone.utc) >= period.starts_at:
-        raise HTTPException(400, "Запись возможна только до начала периода")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Запись возможна только до начала периода")
 
-    topic = db.get(AppealTopic, data.topic_id)
+    topic = TopicRepository.get_one(data.topic_id, session)
     if topic is None or topic.faculty_id != period.faculty_id or not topic.is_active:
-        raise HTTPException(400, "Тема не найдена")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Тема не найдена")
 
-    already = db.scalar(
-        select(Appointment.id).where(
-            Appointment.period_id == period.id,
-            Appointment.student_id == student.id,
-            Appointment.status != "cancelled",
-        )
-    )
-    if already is not None:
-        raise HTTPException(400, "Вы уже записаны на этот период")
-    if count_taken(db, period.id) >= period.capacity:
-        raise HTTPException(400, "Свободных мест нет")
+    if AppointmentRepository.student_has_active(period.id, student.id, session):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Вы уже записаны на этот период")
+    if PeriodRepository.count_taken(period.id, session) >= period.capacity:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Свободных мест нет")
 
     appointment = Appointment(
         period_id=period.id,
@@ -42,70 +37,56 @@ def create_appointment(db, student, data):
         queue_number=period.next_queue_number,
     )
     period.next_queue_number += 1
-    db.add(appointment)
-    db.commit()
-    return appointment
+    return AppointmentRepository.add_one(appointment, session)
 
 
-def cancel_appointment(db, student, appointment_id):
-    appointment = db.get(Appointment, appointment_id)
+def cancel_appointment(session, student, appointment_id):
+    appointment = AppointmentRepository.get_one(appointment_id, session)
     if appointment is None or appointment.student_id != student.id:
-        raise HTTPException(404, "Запись не найдена")
-    period = db.get(ReceptionPeriod, appointment.period_id)
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+    period = PeriodRepository.get_one(appointment.period_id, session)
     if appointment.status != "active":
-        raise HTTPException(400, "Запись нельзя отменить")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Запись нельзя отменить")
     if datetime.now(timezone.utc) >= period.starts_at:
-        raise HTTPException(400, "Период уже начался")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Период уже начался")
     appointment.status = "cancelled"
-    db.commit()
-    return appointment
+    return AppointmentRepository.add_one(appointment, session)
 
 
-def get_dean_period(db, dean, period_id):
-    period = db.get(ReceptionPeriod, period_id)
+def get_dean_period(session, dean, period_id):
+    period = PeriodRepository.get_one(period_id, session)
     if period is None or period.dean_id != dean.id:
-        raise HTTPException(404, "Период не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Период не найден")
     return period
 
 
-def get_queue(db, dean, period_id):
-    get_dean_period(db, dean, period_id)
-    return db.scalars(
-        select(Appointment)
-        .where(Appointment.period_id == period_id, Appointment.status != "cancelled")
-        .order_by(Appointment.queue_number)
-    ).all()
+def get_queue(session, dean, period_id):
+    get_dean_period(session, dean, period_id)
+    return AppointmentRepository.get_queue(period_id, session)
 
 
-def call_next(db, dean, period_id):
-    get_dean_period(db, dean, period_id)
-    appointment = db.scalar(
-        select(Appointment)
-        .where(Appointment.period_id == period_id, Appointment.status == "active")
-        .order_by(Appointment.queue_number)
-        .limit(1)
-        .with_for_update()
-    )
+def call_next(session, dean, period_id):
+    get_dean_period(session, dean, period_id)
+    appointment = AppointmentRepository.get_first_active(period_id, session)
     if appointment is None:
-        raise HTTPException(404, "Очередь пуста")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Очередь пуста")
     appointment.status = "called"
-    db.add(Notification(
-        appointment_id=appointment.id,
-        kind="called",
-        message=f"Вызван ваш номер {appointment.queue_number}",
-    ))
-    db.commit()
-    return appointment
+    NotificationRepository.add(
+        appointment.id,
+        "called",
+        f"Вызван ваш номер {appointment.queue_number}",
+        session,
+    )
+    return AppointmentRepository.add_one(appointment, session)
 
 
-def set_result(db, dean, appointment_id, data):
-    appointment = db.get(Appointment, appointment_id)
+def set_result(session, dean, appointment_id, data):
+    appointment = AppointmentRepository.get_one(appointment_id, session)
     if appointment is None:
-        raise HTTPException(404, "Запись не найдена")
-    get_dean_period(db, dean, appointment.period_id)
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+    get_dean_period(session, dean, appointment.period_id)
     if appointment.status != "called":
-        raise HTTPException(400, "Сначала нужно вызвать номер")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Сначала нужно вызвать номер")
     appointment.status = data.status
     appointment.result_comment = data.result_comment
-    db.commit()
-    return appointment
+    return AppointmentRepository.add_one(appointment, session)

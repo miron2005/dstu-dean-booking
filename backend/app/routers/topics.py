@@ -1,46 +1,37 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from typing import Annotated
 
-from app.database import get_db
-from app.deps import require_role
-from app.models import AppealTopic, User
-from app.schemas.topic import TopicCreate, TopicOut, TopicUpdate
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.deps import SessionDep, require_role
+from app.models import User
+from app.repositories import TopicRepository
+from app.schemas.topic import STopic, STopicAdd, STopicPatch
 
 router = APIRouter(prefix="/topics", tags=["topics"])
 
 
-@router.get("", response_model=list[TopicOut])
-def get_topics(faculty_id: int | None = None, db: Session = Depends(get_db)):
-    query = select(AppealTopic).where(AppealTopic.is_active).order_by(AppealTopic.id)
-    if faculty_id is not None:
-        query = query.where(AppealTopic.faculty_id == faculty_id)
-    return db.scalars(query).all()
+@router.get("", response_model=list[STopic])
+def get_topics(session: SessionDep, faculty_id: int | None = None):
+    return TopicRepository.get_all(faculty_id, session)
 
 
-@router.post("", response_model=TopicOut, status_code=201)
+@router.post("", response_model=STopic, status_code=status.HTTP_201_CREATED)
 def create_topic(
-    data: TopicCreate,
-    user: User = Depends(require_role("secretary")),
-    db: Session = Depends(get_db),
+    data: STopicAdd,
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
 ):
-    topic = AppealTopic(faculty_id=user.faculty_id, title=data.title, description=data.description)
-    db.add(topic)
-    db.commit()
-    return topic
+    return TopicRepository.add_one(user.faculty_id, data, session)
 
 
-@router.patch("/{topic_id}", response_model=TopicOut)
+@router.patch("/{topic_id}", response_model=STopic)
 def update_topic(
     topic_id: int,
-    data: TopicUpdate,
-    user: User = Depends(require_role("secretary")),
-    db: Session = Depends(get_db),
+    data: STopicPatch,
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
 ):
-    topic = db.get(AppealTopic, topic_id)
+    topic = TopicRepository.get_one(topic_id, session)
     if topic is None or topic.faculty_id != user.faculty_id:
-        raise HTTPException(404, "Тема не найдена")
-    for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(topic, field, value)
-    db.commit()
-    return topic
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Тема не найдена")
+    return TopicRepository.update_one(topic, data.model_dump(exclude_unset=True), session)

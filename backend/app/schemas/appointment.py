@@ -3,22 +3,23 @@ from typing import Literal
 from pydantic import AwareDatetime, BaseModel
 
 
-class AppointmentCreate(BaseModel):
+class SAppointmentBase(BaseModel):
     period_id: int
     topic_id: int
     question: str
 
 
-class AppointmentResult(BaseModel):
+class SAppointmentAdd(SAppointmentBase):
+    pass
+
+
+class SAppointmentResult(BaseModel):
     status: Literal["accepted", "no_show"]
     result_comment: str | None = None
 
 
-class AppointmentOut(BaseModel):
+class SAppointment(SAppointmentBase):
     id: int
-    period_id: int
-    topic_id: int
-    question: str
     queue_number: int
     status: str
     created_at: AwareDatetime
@@ -26,6 +27,6 @@ class AppointmentOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class QueueItem(AppointmentOut):
+class SQueueItem(SAppointment):
     student_name: str
     result_comment: str | None

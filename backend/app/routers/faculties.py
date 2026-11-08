@@ -1,36 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.database import get_db
-from app.deps import require_role
-from app.models import Faculty
-from app.schemas.faculty import FacultyCreate, FacultyOut, FacultyUpdate
+from app.deps import SessionDep, require_role
+from app.repositories import FacultyRepository
+from app.schemas.faculty import SFaculty, SFacultyAdd, SFacultyPatch
 
 router = APIRouter(prefix="/faculties", tags=["faculties"])
 
 
-@router.get("", response_model=list[FacultyOut])
-def get_faculties(db: Session = Depends(get_db)):
-    return db.scalars(select(Faculty).where(Faculty.is_active).order_by(Faculty.name)).all()
+@router.get("", response_model=list[SFaculty])
+def get_faculties(session: SessionDep):
+    return FacultyRepository.get_all(session)
 
 
-@router.post("", response_model=FacultyOut, status_code=201, dependencies=[Depends(require_role("admin"))])
-def create_faculty(data: FacultyCreate, db: Session = Depends(get_db)):
-    if db.scalar(select(Faculty.id).where(Faculty.name == data.name)):
-        raise HTTPException(400, "Факультет уже существует")
-    faculty = Faculty(name=data.name)
-    db.add(faculty)
-    db.commit()
-    return faculty
+@router.post(
+    "",
+    response_model=SFaculty,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role("admin"))],
+)
+def create_faculty(data: SFacultyAdd, session: SessionDep):
+    if FacultyRepository.name_exists(data.name, session):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Факультет уже существует")
+    return FacultyRepository.add_one(data.name, session)
 
 
-@router.patch("/{faculty_id}", response_model=FacultyOut, dependencies=[Depends(require_role("admin"))])
-def update_faculty(faculty_id: int, data: FacultyUpdate, db: Session = Depends(get_db)):
-    faculty = db.get(Faculty, faculty_id)
+@router.patch("/{faculty_id}", response_model=SFaculty, dependencies=[Depends(require_role("admin"))])
+def update_faculty(faculty_id: int, data: SFacultyPatch, session: SessionDep):
+    faculty = FacultyRepository.get_one(faculty_id, session)
     if faculty is None:
-        raise HTTPException(404, "Факультет не найден")
-    for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(faculty, field, value)
-    db.commit()
-    return faculty
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Факультет не найден")
+    return FacultyRepository.update_one(faculty, data.model_dump(exclude_unset=True), session)
