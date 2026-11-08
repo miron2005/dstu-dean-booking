@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class STopicBase(BaseModel):
     title: str
     description: str | None = None
+    duration_minutes: int | None = None
 
 
 class STopicAdd(STopicBase):
@@ -13,6 +14,7 @@ class STopicAdd(STopicBase):
 class STopicPatch(BaseModel):
     title: str | None = None
     description: str | None = None
+    duration_minutes: int | None = None
     is_active: bool | None = None
 
 
