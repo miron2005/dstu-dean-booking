@@ -1,0 +1,131 @@
+
+<div class="auth-page">
+  <header class="auth-header">
+    <a routerLink="/" class="logo">
+      <img src="/logo-dgtu.png" alt="Логотип ДГТУ">
+
+      <span>
+        <strong>ДОНСКОЙ ГОСУДАРСТВЕННЫЙ</strong>
+        <strong>ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ</strong>
+      </span>
+    </a>
+
+    <a routerLink="/" class="back-link">← На главную</a>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-card">
+      <span class="auth-label">ЭЛЕКТРОННЫЕ СЕРВИСЫ ДГТУ</span>
+
+      <h1>Регистрация</h1>
+
+      <p class="auth-description">
+        Создайте учётную запись студента,
+        чтобы записываться на приём в деканат.
+      </p>
+
+      <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+
+        <div class="form-group">
+          <label for="full_name">ФИО</label>
+          <input
+            type="text"
+            id="full_name"
+            name="fullName"
+            [(ngModel)]="fullName"
+            placeholder="Иванов Иван Иванович"
+            autocomplete="name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Электронная почта</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="example@mail.ru"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="faculty">Факультет</label>
+
+          <select
+            id="faculty"
+            name="facultyId"
+            [(ngModel)]="facultyId"
+            required
+          >
+            <option [ngValue]="null" disabled>
+              {{ loadingFaculties ? 'Загрузка факультетов...' : 'Выберите факультет' }}
+            </option>
+
+            @for (faculty of faculties; track faculty.id) {
+              <option [ngValue]="faculty.id">
+                {{ faculty.name }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Придумайте пароль"
+            autocomplete="new-password"
+            required
+            minlength="8"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Повторите пароль</label>
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            placeholder="Повторите пароль"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        @if (errorMessage) {
+          <p class="form-error">{{ errorMessage }}</p>
+        }
+
+        @if (successMessage) {
+          <p class="form-success">{{ successMessage }}</p>
+        }
+
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="loading || loadingFaculties || !registerForm.valid"
+        >
+          {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Уже есть аккаунт?
+        <a routerLink="/login">Войти</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="auth-footer">
+    Донской государственный технический университет
+  </footer>
+</div>
+
