@@ -4,16 +4,13 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from app.config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+new_session = sessionmaker(engine)
 
 
-class Base(DeclarativeBase):
+class Model(DeclarativeBase):
     pass
 
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    with new_session() as session:
+        yield session

@@ -1,52 +1,48 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from typing import Annotated
 
-from app.database import get_db
-from app.deps import require_role
-from app.models import ReceptionPeriod, User
-from app.schemas.period import PeriodCreate, PeriodOut, PeriodUpdate
+from fastapi import APIRouter, Depends, status
+
+from app.deps import SessionDep, require_role
+from app.models import User
+from app.repositories import PeriodRepository
+from app.schemas.period import SPeriod, SPeriodAdd, SPeriodPatch
 from app.services import periods as service
 
 router = APIRouter(prefix="/periods", tags=["periods"])
 
 
-@router.get("", response_model=list[PeriodOut])
+@router.get("", response_model=list[SPeriod])
 def get_periods(
-    user: User = Depends(require_role("student", "secretary", "dean")),
-    db: Session = Depends(get_db),
+    user: Annotated[User, Depends(require_role("student", "secretary", "dean"))],
+    session: SessionDep,
 ):
-    periods = db.scalars(
-        select(ReceptionPeriod)
-        .where(ReceptionPeriod.faculty_id == user.faculty_id)
-        .order_by(ReceptionPeriod.starts_at)
-    ).all()
-    return [service.to_out(db, period) for period in periods]
+    periods = PeriodRepository.get_all(user.faculty_id, session)
+    return [service.to_out(session, period) for period in periods]
 
 
-@router.post("", response_model=PeriodOut, status_code=201)
+@router.post("", response_model=SPeriod, status_code=status.HTTP_201_CREATED)
 def create_period(
-    data: PeriodCreate,
-    user: User = Depends(require_role("secretary")),
-    db: Session = Depends(get_db),
+    data: SPeriodAdd,
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
 ):
-    return service.to_out(db, service.create_period(db, user, data))
+    return service.to_out(session, service.create_period(session, user, data))
 
 
-@router.patch("/{period_id}", response_model=PeriodOut)
+@router.patch("/{period_id}", response_model=SPeriod)
 def update_period(
     period_id: int,
-    data: PeriodUpdate,
-    user: User = Depends(require_role("secretary")),
-    db: Session = Depends(get_db),
+    data: SPeriodPatch,
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
 ):
-    return service.to_out(db, service.update_period(db, user, period_id, data))
+    return service.to_out(session, service.update_period(session, user, period_id, data))
 
 
-@router.post("/{period_id}/cancel", response_model=PeriodOut)
+@router.post("/{period_id}/cancel", response_model=SPeriod)
 def cancel_period(
     period_id: int,
-    user: User = Depends(require_role("secretary")),
-    db: Session = Depends(get_db),
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
 ):
-    return service.to_out(db, service.cancel_period(db, user, period_id))
+    return service.to_out(session, service.cancel_period(session, user, period_id))

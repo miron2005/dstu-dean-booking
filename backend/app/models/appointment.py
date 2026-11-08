@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
+from app.database import Model
 
 
-class Appointment(Base):
+class Appointment(Model):
     __tablename__ = "appointments"
     __table_args__ = (
         UniqueConstraint("period_id", "queue_number", name="uq_appointment_number"),

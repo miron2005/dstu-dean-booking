@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.database import Base
+from app.database import Model
 
 
-class ReceptionPeriod(Base):
+class ReceptionPeriod(Model):
     __tablename__ = "reception_periods"
     __table_args__ = (
         CheckConstraint("capacity > 0", name="ck_period_capacity"),

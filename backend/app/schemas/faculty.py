@@ -1,18 +1,21 @@
 from pydantic import BaseModel
 
 
-class FacultyCreate(BaseModel):
+class SFacultyBase(BaseModel):
     name: str
 
 
-class FacultyUpdate(BaseModel):
+class SFacultyAdd(SFacultyBase):
+    pass
+
+
+class SFacultyPatch(BaseModel):
     name: str | None = None
     is_active: bool | None = None
 
 
-class FacultyOut(BaseModel):
+class SFaculty(SFacultyBase):
     id: int
-    name: str
     is_active: bool
 
     model_config = {"from_attributes": True}

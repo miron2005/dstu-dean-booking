@@ -1,7 +1,7 @@
 from pydantic import AwareDatetime, BaseModel
 
 
-class NotificationOut(BaseModel):
+class SNotification(BaseModel):
     id: int
     appointment_id: int
     kind: str

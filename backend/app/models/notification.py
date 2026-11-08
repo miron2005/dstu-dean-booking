@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.database import Base
+from app.database import Model
 
 
-class Notification(Base):
+class Notification(Model):
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

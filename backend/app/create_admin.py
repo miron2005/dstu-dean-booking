@@ -1,14 +1,14 @@
 import sys
 
-from app.database import Base, SessionLocal, engine
+from app.database import Model, engine, new_session
 from app.models import User
 from app.security import hash_password
 
 email, password = sys.argv[1], sys.argv[2]
 
-Base.metadata.create_all(engine)
+Model.metadata.create_all(engine)
 
-db = SessionLocal()
+db = new_session()
 db.add(User(full_name="Администратор", email=email, password_hash=hash_password(password), role="admin"))
 db.commit()
 db.close()

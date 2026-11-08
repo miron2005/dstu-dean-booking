@@ -1,10 +1,10 @@
 from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.database import Base
+from app.database import Model
 
 
-class Faculty(Base):
+class Faculty(Model):
     __tablename__ = "faculties"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
