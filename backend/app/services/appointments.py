@@ -90,3 +90,45 @@ def set_result(session, dean, appointment_id, data):
     appointment.status = data.status
     appointment.result_comment = data.result_comment
     return AppointmentRepository.add_one(appointment, session)
+
+
+STATUS_TRANSITIONS = {
+    "active": {"called", "cancelled"},
+    "called": {"accepted", "no_show", "cancelled"},
+}
+
+
+def get_staff_appointment(session, staff, appointment_id):
+    appointment = AppointmentRepository.get_one(appointment_id, session)
+    if appointment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+    period = PeriodRepository.get_one(appointment.period_id, session)
+    if staff.role != "admin" and period.faculty_id != staff.faculty_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+    return appointment
+
+
+def list_appointments(session, staff, period_id, status_filter):
+    faculty_id = None if staff.role == "admin" else staff.faculty_id
+    return AppointmentRepository.get_all(faculty_id, period_id, status_filter, session)
+
+
+def change_status(session, staff, appointment_id, data):
+    appointment = get_staff_appointment(session, staff, appointment_id)
+    if data.status not in STATUS_TRANSITIONS.get(appointment.status, set()):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Нельзя перевести запись из статуса {appointment.status} в {data.status}",
+        )
+    appointment.status = data.status
+    if data.result_comment is not None:
+        appointment.result_comment = data.result_comment
+    if data.status == "called":
+        NotificationRepository.add(
+            appointment.id, "called", f"Вызван ваш номер {appointment.queue_number}", session
+        )
+    if data.status == "cancelled":
+        NotificationRepository.add(
+            appointment.id, "cancelled_by_staff", "Ваша запись отменена сотрудником деканата", session
+        )
+    return AppointmentRepository.add_one(appointment, session)
