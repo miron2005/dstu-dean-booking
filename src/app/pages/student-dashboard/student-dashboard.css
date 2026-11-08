@@ -577,4 +577,32 @@
   .footer {
     flex-direction: column;
   }
+  .notification-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.notification-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #e8edf5;
+  color: #243b64;
+}
+
+.stat-card,
+.action-card {
+  text-align: left;
+}
+
+.action-card span {
+  font-weight: 600;
+}
 }
