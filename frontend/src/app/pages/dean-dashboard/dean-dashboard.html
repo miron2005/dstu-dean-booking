@@ -1,0 +1,298 @@
+
+<div class="dashboard">
+  <!-- Боковая панель -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">Д</div>
+      <div>
+        <strong>Деканат</strong>
+        <span>Система записи на приём</span>
+      </div>
+    </div>
+
+    <div class="sidebar-title">РАБОЧЕЕ МЕСТО</div>
+
+    <nav class="navigation">
+      <a class="nav-item active" href="javascript:void(0)">
+        <span>▦</span>
+        Главная
+      </a>
+      <a class="nav-item" href="#periods">
+        <span>◷</span>
+        Приёмные периоды
+      </a>
+      <a class="nav-item" href="#queue">
+        <span>☷</span>
+        Очередь студентов
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="nav-item logout-button" (click)="logout()">
+        <span>↪</span>
+        Выйти из аккаунта
+      </button>
+    </div>
+  </aside>
+
+  <!-- Основная область -->
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <div class="breadcrumb">Рабочее место / Декан</div>
+        <h1>Панель управления</h1>
+      </div>
+
+      <div class="user-mini">
+        <div class="avatar">
+          {{ user?.full_name?.charAt(0) || 'Д' }}
+        </div>
+        <div>
+          <strong>{{ user?.full_name || 'Декан' }}</strong>
+          <span>Декан факультета</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Приветствие -->
+    <section class="welcome">
+      <div>
+        <div class="welcome-label">ЛИЧНЫЙ КАБИНЕТ ДЕКАНА</div>
+        <h2>Добро пожаловать, {{ user?.full_name || 'уважаемый декан' }}!</h2>
+        <p>
+          Здесь вы можете управлять приёмом студентов,
+          просматривать очередь и фиксировать результаты встреч.
+        </p>
+      </div>
+      <div class="welcome-decoration">DEAN</div>
+    </section>
+
+    <!-- Сообщения -->
+    <div class="message error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="message success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <!-- Статистика -->
+    <section class="stats">
+      <div class="stat-card">
+        <div class="stat-icon gold">◷</div>
+        <div>
+          <span>Приёмных периодов</span>
+          <strong>{{ periods.length }}</strong>
+          <small>Всего доступно</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon blue">☷</div>
+        <div>
+          <span>Записано студентов</span>
+          <strong>{{ queue.length }}</strong>
+          <small>В выбранном периоде</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon orange">◉</div>
+        <div>
+          <span>Ожидают приёма</span>
+          <strong>{{ activeCount }}</strong>
+          <small>Активные записи</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">✓</div>
+        <div>
+          <span>Вызваны</span>
+          <strong>{{ calledCount }}</strong>
+          <small>Ожидают завершения приёма</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Приёмные периоды -->
+    <section class="section" id="periods">
+      <div class="section-heading">
+        <div>
+          <h2>Приёмные периоды</h2>
+          <p>Выберите период, чтобы посмотреть очередь студентов</p>
+        </div>
+      </div>
+
+      <div class="loading" *ngIf="loading">
+        Загрузка приёмных периодов...
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && periods.length === 0">
+        <div class="empty-icon">◷</div>
+        <h3>Приёмных периодов пока нет</h3>
+        <p>Когда секретарь создаст период приёма, он появится здесь.</p>
+      </div>
+
+      <div class="period-grid" *ngIf="periods.length > 0">
+        <button
+          class="period-card"
+          *ngFor="let period of periods"
+          [class.selected]="selectedPeriod?.id === period.id"
+          (click)="selectPeriod(period)"
+        >
+          <div class="period-card-top">
+            <span class="period-label">ПРИЁМНЫЙ ПЕРИОД</span>
+            <span class="period-status">{{ period.status }}</span>
+          </div>
+
+          <strong class="period-date">
+            {{ period.starts_at | date:'dd.MM.yyyy' }}
+          </strong>
+
+          <div class="period-time">
+            {{ period.starts_at | date:'HH:mm' }}
+            — {{ period.ends_at | date:'HH:mm' }}
+          </div>
+
+          <div class="period-capacity">
+            <span>Свободные места</span>
+            <strong>{{ period.free_places }} / {{ period.capacity }}</strong>
+          </div>
+
+          <div class="capacity-track">
+            <div
+              class="capacity-fill"
+              [style.width.%]="period.capacity > 0
+                ? (period.free_places / period.capacity) * 100
+                : 0"
+            ></div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Очередь студентов -->
+    <section class="section" id="queue">
+      <div class="section-heading">
+        <div>
+          <h2>Очередь студентов</h2>
+          <p *ngIf="selectedPeriod">
+            Период от {{ selectedPeriod.starts_at | date:'dd.MM.yyyy HH:mm' }}
+          </p>
+          <p *ngIf="!selectedPeriod">
+            Сначала выберите приёмный период
+          </p>
+        </div>
+
+        <button
+          class="primary-button"
+          (click)="callNext()"
+          [disabled]="!selectedPeriod || actionLoading || activeCount === 0"
+        >
+          {{ actionLoading ? 'Подождите...' : 'Вызвать следующего' }}
+        </button>
+      </div>
+
+      <div class="loading" *ngIf="queueLoading">
+        Загрузка очереди...
+      </div>
+
+      <div
+        class="empty-state"
+        *ngIf="!queueLoading && selectedPeriod && queue.length === 0"
+      >
+        <div class="empty-icon">☷</div>
+        <h3>Очередь пока пуста</h3>
+        <p>На этот приёмный период ещё никто не записался.</p>
+      </div>
+
+      <div class="queue-list" *ngIf="!queueLoading && queue.length > 0">
+        <div class="queue-item" *ngFor="let appointment of queue">
+          <div class="queue-number">
+            {{ appointment.queue_number }}
+          </div>
+
+          <div class="queue-info">
+            <strong>{{ appointment.student_name }}</strong>
+            <p>{{ appointment.question }}</p>
+            <small>
+              Запись №{{ appointment.id }}
+              · {{ appointment.created_at | date:'dd.MM.yyyy HH:mm' }}
+            </small>
+          </div>
+
+          <span
+            class="status"
+            [ngClass]="appointment.status"
+          >
+            {{ getStatusLabel(appointment.status) }}
+          </span>
+
+          <button
+            class="outline-button"
+            *ngIf="appointment.status === 'called'"
+            (click)="chooseAppointment(appointment)"
+          >
+            Завершить приём
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Завершение приёма -->
+    <section class="section result-section" *ngIf="selectedAppointment">
+      <div class="section-heading">
+        <div>
+          <h2>Результат приёма</h2>
+          <p>
+            Студент: {{ selectedAppointment.student_name }}
+            · Очередь №{{ selectedAppointment.queue_number }}
+          </p>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <label for="resultComment">Комментарий к приёму</label>
+
+        <textarea
+          id="resultComment"
+          [(ngModel)]="resultComment"
+          placeholder="Например: вопрос решён, выданы необходимые рекомендации..."
+          rows="4"
+        ></textarea>
+
+        <div class="result-actions">
+          <button
+            class="success-button"
+            (click)="saveResult('accepted')"
+            [disabled]="actionLoading || !canFinishAppointment"
+          >
+            Студент принят
+          </button>
+
+          <button
+            class="danger-button"
+            (click)="saveResult('no_show')"
+            [disabled]="actionLoading || !canFinishAppointment"
+          >
+            Не явился
+          </button>
+
+          <button
+            class="cancel-button"
+            (click)="selectedAppointment = null"
+            [disabled]="actionLoading"
+          >
+            Отмена
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Система записи на приём в деканат</span>
+      <span>Личный кабинет декана</span>
+    </footer>
+  </main>
+</div>
