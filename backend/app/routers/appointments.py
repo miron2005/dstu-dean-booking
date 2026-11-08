@@ -1,11 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.deps import SessionDep, require_role
 from app.models import User
 from app.repositories import AppointmentRepository
-from app.schemas.appointment import SAppointment, SAppointmentAdd, SAppointmentResult, SQueueItem
+from app.schemas.appointment import (
+    SAppointment,
+    SAppointmentAdd,
+    SAppointmentResult,
+    SAppointmentStatus,
+    SQueueItem,
+)
 from app.services import appointments as service
 
 router = APIRouter(tags=["appointments"])
@@ -26,6 +32,26 @@ def create_appointment(
     session: SessionDep,
 ):
     return service.create_appointment(session, user, data)
+
+
+@router.get("/appointments", response_model=list[SQueueItem])
+def get_appointments(
+    staff: Annotated[User, Depends(require_role("secretary", "admin"))],
+    session: SessionDep,
+    period_id: int | None = None,
+    status_filter: Annotated[str | None, Query(alias="status")] = None,
+):
+    return [to_queue_item(a) for a in service.list_appointments(session, staff, period_id, status_filter)]
+
+
+@router.patch("/appointments/{appointment_id}/status", response_model=SQueueItem)
+def change_appointment_status(
+    appointment_id: int,
+    data: SAppointmentStatus,
+    staff: Annotated[User, Depends(require_role("secretary", "admin"))],
+    session: SessionDep,
+):
+    return to_queue_item(service.change_status(session, staff, appointment_id, data))
 
 
 @router.get("/appointments/my", response_model=list[SAppointment])
