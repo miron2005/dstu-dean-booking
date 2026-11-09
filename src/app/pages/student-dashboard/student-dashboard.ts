@@ -1,5 +1,10 @@
 
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
@@ -21,6 +26,7 @@ import {
 export class StudentDashboard implements OnInit {
   private readonly api = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   appointments: StudentAppointment[] = [];
@@ -36,6 +42,9 @@ export class StudentDashboard implements OnInit {
       return;
     }
 
+    this.loading = true;
+    this.errorMessage = '';
+
     forkJoin({
       user: this.api.getMe(),
       appointments: this.api.getMyAppointments(),
@@ -47,12 +56,17 @@ export class StudentDashboard implements OnInit {
         this.appointments = data.appointments;
         this.notifications = data.notifications;
         this.periods = data.periods;
-        this.loading = false;
-      },
-      error: (error) => {
+
         this.loading = false;
 
+        console.log('Данные личного кабинета загружены:', data);
+
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
         console.error('Ошибка загрузки личного кабинета:', error);
+
+        this.loading = false;
 
         if (error.status === 401) {
           this.api.logout();
@@ -62,6 +76,8 @@ export class StudentDashboard implements OnInit {
 
         this.errorMessage =
           'Не удалось загрузить данные личного кабинета. Попробуйте обновить страницу.';
+
+        this.cdr.detectChanges();
       },
     });
   }
@@ -115,7 +131,7 @@ export class StudentDashboard implements OnInit {
   }
 
   get studentName(): string {
-    return this.user?.full_name ?? 'Студент';
+    return this.user?.full_name || 'Студент';
   }
 
   get initials(): string {

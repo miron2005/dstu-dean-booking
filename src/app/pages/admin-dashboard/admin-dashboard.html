@@ -12,19 +12,24 @@
     <div class="sidebar-title">УПРАВЛЕНИЕ</div>
 
     <nav class="navigation">
-      <button class="nav-item" [class.active]="activeTab === 'users'"
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'users'"
         (click)="activeTab = 'users'">
-        <span>♙</span> Пользователи
+        Пользователи
       </button>
-      <button class="nav-item" [class.active]="activeTab === 'faculties'"
+
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'faculties'"
         (click)="activeTab = 'faculties'">
-        <span>▦</span> Факультеты
+        Факультеты
       </button>
     </nav>
 
     <div class="sidebar-bottom">
       <button class="nav-item logout-button" (click)="logout()">
-        <span>↪</span> Выйти из аккаунта
+        Выйти из аккаунта
       </button>
     </div>
   </aside>
@@ -54,7 +59,6 @@
           настраивать список факультетов и контролировать учётные записи.
         </p>
       </div>
-      <div class="welcome-decoration">ADMIN</div>
     </section>
 
     <div class="message error-message" *ngIf="error">
@@ -63,7 +67,6 @@
 
     <div class="stats">
       <div class="stat-card">
-        <div class="stat-icon gold">♙</div>
         <div>
           <span>Всего пользователей</span>
           <strong>{{ users.length }}</strong>
@@ -72,7 +75,6 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon blue">✓</div>
         <div>
           <span>Активные пользователи</span>
           <strong>{{ activeUsersCount }}</strong>
@@ -81,7 +83,6 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon orange">▦</div>
         <div>
           <span>Факультеты</span>
           <strong>{{ faculties.length }}</strong>
@@ -109,18 +110,25 @@
         <div class="form-grid">
           <label>
             ФИО
-            <input [(ngModel)]="userForm.full_name" placeholder="Иванов Иван Иванович">
+            <input
+              [(ngModel)]="userForm.full_name"
+              placeholder="Иванов Иван Иванович">
           </label>
 
           <label>
             Электронная почта
-            <input [(ngModel)]="userForm.email" type="email"
-              placeholder="user@example.com" [disabled]="!!editingUserId">
+            <input
+              [(ngModel)]="userForm.email"
+              type="email"
+              placeholder="user@example.com"
+              [disabled]="!!editingUserId">
           </label>
 
           <label *ngIf="!editingUserId">
             Пароль
-            <input [(ngModel)]="userForm.password" type="password"
+            <input
+              [(ngModel)]="userForm.password"
+              type="password"
               placeholder="Пароль пользователя">
           </label>
 
@@ -189,7 +197,8 @@
                   <button class="outline-button" (click)="editUser(user)">
                     Изменить
                   </button>
-                  <button class="danger-button"
+                  <button
+                    class="danger-button"
                     (click)="toggleUserStatus(user)">
                     {{ user.is_active ? 'Отключить' : 'Включить' }}
                   </button>
@@ -223,7 +232,8 @@
 
         <label>
           Название факультета
-          <input [(ngModel)]="facultyForm.name"
+          <input
+            [(ngModel)]="facultyForm.name"
             placeholder="Например, факультет информационных технологий">
         </label>
 
@@ -241,7 +251,6 @@
 
       <div class="faculty-grid" *ngIf="!loading">
         <div class="faculty-card" *ngFor="let faculty of faculties">
-          <div class="faculty-icon">▦</div>
           <div class="faculty-info">
             <strong>{{ faculty.name }}</strong>
             <span>ID: {{ faculty.id }}</span>
@@ -249,9 +258,11 @@
               {{ faculty.is_active ? 'Активен' : 'Отключён' }}
             </span>
           </div>
+
           <button class="outline-button" (click)="editFaculty(faculty)">
             Изменить
           </button>
+
           <button class="danger-button" (click)="toggleFacultyStatus(faculty)">
             {{ faculty.is_active ? 'Отключить' : 'Включить' }}
           </button>

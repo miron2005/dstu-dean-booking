@@ -4,6 +4,7 @@
   min-height: 100vh;
   font-family: Arial, sans-serif;
   color: #292d35;
+  background: #f4f5f8;
 }
 
 * {
@@ -16,7 +17,8 @@
   background: #f4f5f8;
 }
 
-/* Боковое меню */
+/* Боковая панель */
+
 .sidebar {
   width: 260px;
   min-width: 260px;
@@ -25,44 +27,18 @@
   flex-direction: column;
   padding: 25px 18px;
   background: #252a32;
-  color: white;
+  color: #fff;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 5px 8px 30px;
+.sidebar-logo {
+  padding: 5px 8px 35px;
 }
 
-.logo img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.logo strong,
-.logo span {
+.sidebar-logo span {
   display: block;
-}
-
-.logo strong {
-  font-size: 19px;
-}
-
-.logo span {
-  margin-top: 5px;
-  color: #b9bdc5;
-  font-size: 11px;
-}
-
-.sidebar-title {
-  margin: 15px 10px 12px;
-  color: #9299a5;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .navigation {
@@ -74,25 +50,25 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 13px 14px;
+  min-height: 42px;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
   color: #d5d8de;
   text-decoration: none;
   font-size: 14px;
-  border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
-.nav-item span {
-  width: 20px;
-  text-align: center;
-  font-size: 17px;
+.nav-item:hover {
+  background: #363d48;
+  color: #fff;
 }
 
-.nav-item:hover,
 .nav-item.active {
-  color: white;
+  border-left-color: #d2ad70;
   background: #a98242;
+  color: #fff;
 }
 
 .sidebar-bottom {
@@ -101,10 +77,11 @@
 }
 
 /* Основная область */
+
 .main-content {
   flex: 1;
   min-width: 0;
-  max-width: 1600px;
+  max-width: 1700px;
   padding: 30px 38px;
   margin: 0 auto;
 }
@@ -117,41 +94,51 @@
   margin-bottom: 28px;
 }
 
-.breadcrumb {
-  color: #858b96;
-  font-size: 12px;
-}
-
-.topbar h1 {
-  margin: 9px 0 0;
+.topbar-left h1 {
+  margin: 0;
+  color: #252a32;
   font-size: 26px;
+  font-weight: 700;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 20px;
 }
 
 .notification-button {
   position: relative;
-  width: 42px;
-  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
   border: 1px solid #e4e6eb;
-  border-radius: 10px;
-  background: white;
-  font-size: 19px;
-  cursor: pointer;
+  border-radius: 9px;
+  background: #fff;
+  color: #454d59;
+  font-size: 13px;
+  text-decoration: none;
+  transition: 0.2s;
 }
 
-.notification-dot {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d49a36;
+.notification-button:hover {
+  border-color: #a98242;
+  color: #a98242;
+}
+
+.notification-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #f7f0e5;
+  color: #967039;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .user-mini {
@@ -165,104 +152,112 @@
   height: 42px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #eee3d0;
   color: #8a672f;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.user-mini strong,
-.user-mini span {
+.user-mini-info strong,
+.user-mini-info span {
   display: block;
 }
 
-.user-mini strong {
+.user-mini-info strong {
+  color: #303640;
   font-size: 13px;
 }
 
-.user-mini span {
+.user-mini-info span {
   margin-top: 4px;
   color: #858b96;
-  font-size: 12px;
+  font-size: 11px;
+}
+
+/* Содержимое страницы */
+
+.dashboard-content {
+  width: 100%;
+}
+
+.loading-state,
+.error-state {
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid #e9eaf0;
+  border-radius: 12px;
+  background: #fff;
+  color: #747b86;
+  font-size: 14px;
+}
+
+.error-state {
+  border-color: #f1d4d4;
+  background: #fff0f0;
+  color: #b64d4d;
 }
 
 /* Приветственный блок */
-.welcome {
+
+.welcome-section {
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  min-height: 155px;
+  min-height: 185px;
   padding: 30px 35px;
   margin-bottom: 25px;
-  border-radius: 14px;
-  color: white;
-  background: linear-gradient(115deg, #34312d, #675035);
+  border-radius: 15px;
+  color: #fff;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(30, 37, 48, 0.88) 0%,
+      rgba(30, 37, 48, 0.72) 55%,
+      rgba(30, 37, 48, 0.48) 100%
+    ),
+    url('/dgtu-building.jpg') center 45% / cover no-repeat;
 }
 
-.welcome-label {
-  color: #e5c58e;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.welcome h2 {
-  margin: 14px 0 9px;
+.welcome-section h2 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
   font-size: 25px;
+  line-height: 1.35;
 }
 
-.welcome p {
-  max-width: 600px;
+.welcome-section p {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
   margin: 0;
-  color: #e6e0d8;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.welcome-decoration {
-  position: absolute;
-  right: 35px;
-  color: rgba(255, 255, 255, 0.08);
-  font-size: 70px;
-  font-weight: 900;
-  pointer-events: none;
+  color: #f0f1f3;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 /* Статистика */
-.stats {
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 32px;
+  gap: 17px;
+  margin-bottom: 30px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 15px;
-  min-width: 0;
+  min-height: 110px;
   padding: 20px;
-  background: white;
-  border: 1px solid #e9eaf0;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px rgba(30, 40, 60, 0.035);
+  border: 1px solid #e9ebef;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(30, 40, 60, 0.025);
 }
-
-.stat-icon {
-  width: 43px;
-  height: 43px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  font-size: 19px;
-}
-
-.gold { background: #f8eedc; color: #a98242; }
-.green { background: #e4f4eb; color: #319b63; }
-.blue { background: #e7effc; color: #4b79c5; }
-.orange { background: #fff0e3; color: #d88a3b; }
 
 .stat-card span,
 .stat-card strong,
@@ -271,23 +266,31 @@
 }
 
 .stat-card span {
-  color: #777e89;
+  color: #777f8c;
   font-size: 12px;
 }
 
 .stat-card strong {
-  margin: 5px 0;
-  font-size: 25px;
+  margin: 7px 0;
+  color: #252a32;
+  font-size: 27px;
+  font-weight: 700;
 }
 
 .stat-card small {
-  color: #9a9faa;
+  color: #a0a5ae;
   font-size: 11px;
 }
 
-/* Секции */
-.section {
-  margin-bottom: 30px;
+/* Основные секции */
+
+.content-section {
+  margin-bottom: 25px;
+  padding: 24px;
+  border: 1px solid #e9ebef;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(30, 40, 60, 0.025);
 }
 
 .section-heading {
@@ -295,248 +298,356 @@
   justify-content: space-between;
   align-items: center;
   gap: 15px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .section-heading h2 {
   margin: 0;
+  color: #252a32;
   font-size: 19px;
+  font-weight: 700;
 }
 
 .section-heading p {
-  margin: 6px 0 0;
-  color: #858b96;
-  font-size: 13px;
+  margin: 7px 0 0;
+  color: #9299a5;
+  font-size: 12px;
 }
 
-.section-heading a {
+.text-link {
   color: #a47b3b;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   text-decoration: none;
 }
 
-/* Карточка приёма */
-.appointment-card {
+.text-link:hover {
+  color: #795a2d;
+  text-decoration: underline;
+}
+
+/* Ближайший приём */
+
+.appointment-highlight {
   display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 22px;
-  background: white;
-  border: 1px solid #e9eaf0;
-  border-radius: 12px;
+  padding: 23px;
+  border: 1px solid #eee2cd;
+  border-radius: 11px;
+  background: #fdfbf7;
 }
 
-.appointment-date {
-  width: 75px;
-  min-width: 75px;
-  padding: 12px;
-  text-align: center;
-  border-radius: 10px;
-  background: #f7f0e5;
-  color: #967039;
-}
-
-.appointment-date span,
-.appointment-date strong,
-.appointment-date small {
-  display: block;
-}
-
-.appointment-date span,
-.appointment-date small {
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.appointment-date strong {
-  margin: 5px 0;
-  font-size: 29px;
-}
-
-.appointment-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.status {
-  display: inline-block;
-  padding: 5px 9px;
-  border-radius: 20px;
-  font-size: 11px;
-}
-
-.confirmed {
-  color: #278354;
-  background: #e5f5eb;
-}
-
-.appointment-info h3 {
-  margin: 10px 0 7px;
-  font-size: 16px;
-}
-
-.appointment-info p {
-  margin: 0;
-  color: #858b96;
-  font-size: 13px;
-}
-
-.appointment-meta {
+.appointment-highlight-info {
   display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-top: 13px;
-  color: #747b86;
-  font-size: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
 }
 
-.outline-button {
-  padding: 10px 16px;
-  border: 1px solid #b18b50;
-  border-radius: 7px;
-  color: #99723b;
-  background: white;
-  cursor: pointer;
-}
-
-.outline-button:hover {
-  color: white;
-  background: #a98242;
-}
-
-/* Быстрые действия */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.action-card {
-  display: block;
-  padding: 22px;
-  color: inherit;
-  text-decoration: none;
-  background: white;
-  border: 1px solid #e9eaf0;
-  border-radius: 12px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.action-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 20px rgba(30, 40, 60, 0.08);
-}
-
-.action-icon {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
+.section-label {
   color: #a98242;
-  background: #f7f0e5;
-  font-size: 22px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
-.action-card h3 {
-  margin: 16px 0 8px;
+.appointment-highlight h3 {
+  margin: 0;
+  color: #303640;
   font-size: 16px;
 }
 
-.action-card p {
-  min-height: 36px;
-  margin: 0 0 15px;
-  color: #858b96;
-  font-size: 12px;
-  line-height: 1.5;
+.appointment-highlight p {
+  margin: 0;
+  color: #747b86;
+  font-size: 13px;
 }
 
-.action-card > span {
-  color: #a98242;
+.appointment-status {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #e9f5ed;
+  color: #43835a;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Состояние без записей */
+
+.empty-state {
+  padding: 30px 24px;
+  border: 1px dashed #dfe2e7;
+  border-radius: 11px;
+  background: #fafbfc;
+  text-align: center;
+}
+
+.empty-state h3 {
+  margin: 0 0 9px;
+  color: #303640;
+  font-size: 16px;
+}
+
+.empty-state p {
+  margin: 0 0 17px;
+  color: #858b96;
   font-size: 13px;
-  font-weight: bold;
+  line-height: 1.6;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 39px;
+  padding: 10px 17px;
+  border: 1px solid #a98242;
+  border-radius: 8px;
+  background: #a98242;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.primary-button:hover {
+  background: #92713b;
+  border-color: #92713b;
+}
+
+/* Список записей */
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  border: 1px solid #e9ebef;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.appointment-card:hover {
+  border-color: #d5c09d;
+}
+
+.appointment-card-main h3 {
+  margin: 0 0 8px;
+  color: #303640;
+  font-size: 14px;
+}
+
+.appointment-card-main p {
+  margin: 5px 0;
+  color: #858b96;
+  font-size: 12px;
+}
+
+.appointment-card-status {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border-radius: 20px;
+  background: #e9f5ed;
+  color: #43835a;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* Уведомления */
+
 .notifications-list {
-  padding: 5px 20px;
-  background: white;
-  border: 1px solid #e9eaf0;
-  border-radius: 12px;
-}
-
-.notification-item {
   display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  padding: 17px 0;
-  border-bottom: 1px solid #eeeef1;
+  flex-direction: column;
 }
 
-.notification-item:last-child {
+.notification-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 17px 18px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.notification-card:last-child {
   border-bottom: none;
 }
 
-.notification-icon {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: #a98242;
-  background: #f7f0e5;
+.notification-card-content {
+  min-width: 0;
 }
 
-.notification-item strong {
+.notification-card-content p {
+  margin: 0 0 7px;
+  color: #454d59;
   font-size: 13px;
+  line-height: 1.6;
 }
 
-.notification-item p {
-  margin: 5px 0;
-  color: #747b86;
-  font-size: 12px;
-}
-
-.notification-item small {
+.notification-card-content small {
   color: #a0a5ae;
   font-size: 11px;
 }
 
-/* Подвал */
-.footer {
+.notification-status {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  border-radius: 20px;
+  background: #f7f0e5;
+  color: #967039;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Профиль */
+
+.profile-card {
   display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 20px 0 5px;
+  align-items: flex-start;
+  gap: 22px;
+  padding: 22px;
+  border: 1px solid #e9ebef;
+  border-radius: 11px;
+  background: #fafbfc;
+}
+
+.profile-avatar {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #eee3d0;
+  color: #8a672f;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.profile-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 35px;
+  flex: 1;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.profile-field span {
+  color: #9299a5;
+  font-size: 11px;
+}
+
+.profile-field strong {
+  color: #303640;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Быстрые действия */
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 155px;
+  padding: 20px;
+  border: 1px solid #e9ebef;
+  border-radius: 11px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  border-color: #d5c09d;
+  box-shadow: 0 6px 18px rgba(30, 40, 60, 0.06);
+}
+
+.action-card h3 {
+  margin: 0 0 10px;
+  color: #303640;
+  font-size: 15px;
+}
+
+.action-card p {
+  flex: 1;
+  margin: 0 0 15px;
+  color: #858b96;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.action-card span {
+  color: #a98242;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Подвал */
+
+.dashboard-footer {
+  padding: 17px 3px 5px;
   border-top: 1px solid #e3e5e9;
   color: #9298a2;
   font-size: 11px;
 }
 
-/* Адаптация */
-@media (max-width: 1100px) {
-  .stats {
+.dashboard-footer p {
+  margin: 0;
+}
+
+/* Адаптация под разные экраны */
+
+@media (max-width: 1250px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 850px) {
   .sidebar {
-    width: 210px;
-    min-width: 210px;
+    width: 220px;
+    min-width: 220px;
   }
 
   .main-content {
     padding: 22px;
   }
 
-  .quick-actions {
-    grid-template-columns: 1fr;
+  .profile-info {
+    gap: 18px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .dashboard {
     display: block;
   }
@@ -545,64 +656,110 @@
     width: 100%;
     min-width: 0;
     min-height: auto;
+    padding: 18px;
+  }
+
+  .sidebar-logo {
+    padding-bottom: 18px;
+  }
+
+  .navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-item {
+    padding: 11px;
+    font-size: 12px;
   }
 
   .sidebar-bottom {
-    margin-top: 10px;
+    padding-top: 10px;
   }
 
   .main-content {
-    padding: 18px 14px;
+    padding: 20px 14px;
   }
 
-  .topbar,
-  .topbar-right {
-    flex-wrap: wrap;
-  }
-
-  .stats {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 13px;
-  }
-
-  .appointment-card {
+  .topbar {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .footer {
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .topbar-left h1 {
+    font-size: 22px;
+  }
+
+  .welcome-section {
+    min-height: 165px;
+    padding: 23px 20px;
+    background-position: center;
+  }
+
+  .welcome-section h2 {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 100px;
+    padding: 14px;
+  }
+
+  .stat-card strong {
+    font-size: 23px;
+  }
+
+  .content-section {
+    padding: 17px;
+  }
+
+  .profile-card {
     flex-direction: column;
   }
-  .notification-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
+
+  .profile-info {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-card-status {
+    align-self: flex-start;
+  }
+
+  .notification-card {
+    align-items: flex-start;
+  }
+
+  .dashboard-footer {
+    margin-top: 10px;
+  }
 }
 
-.notification-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
-  font-size: 12px;
-  background: #e8edf5;
-  color: #243b64;
-}
+@media (max-width: 380px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 
-.stat-card,
-.action-card {
-  text-align: left;
-}
-
-.action-card span {
-  font-weight: 600;
-}
+  .navigation {
+    grid-template-columns: 1fr;
+  }
 }
