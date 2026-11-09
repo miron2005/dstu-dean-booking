@@ -89,6 +89,24 @@ export interface PeriodUpdate {
   status?: string;
 }
 
+// Темы обращений
+
+export interface AppealTopic {
+  id: number;
+  faculty_id: number;
+  title: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+// Создание записи студента
+
+export interface AppointmentCreate {
+  period_id: number;
+  topic_id: number;
+  question: string;
+}
+
 // Очередь
 
 export interface QueueItem {
@@ -277,6 +295,18 @@ export class ApiService {
     );
   }
 
+  // Темы обращений
+
+  getTopics(facultyId: number): Observable<AppealTopic[]> {
+    return this.http.get<AppealTopic[]>(
+      `${this.baseUrl}/topics`,
+      {
+        headers: this.getAuthHeaders(),
+        params: { faculty_id: facultyId },
+      },
+    );
+  }
+
   // Очередь
 
   getQueue(periodId: number): Observable<QueueItem[]> {
@@ -300,6 +330,18 @@ export class ApiService {
   ): Observable<QueueItem> {
     return this.http.patch<QueueItem>(
       `${this.baseUrl}/appointments/${appointmentId}/result`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Создание записи на приём
+
+  createAppointment(
+    data: AppointmentCreate,
+  ): Observable<StudentAppointment> {
+    return this.http.post<StudentAppointment>(
+      `${this.baseUrl}/appointments`,
       data,
       { headers: this.getAuthHeaders() },
     );

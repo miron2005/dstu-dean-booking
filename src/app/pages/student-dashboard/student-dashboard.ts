@@ -36,6 +36,8 @@ export class StudentDashboard implements OnInit {
   loading = true;
   errorMessage = '';
 
+  activeSection = 'home';
+
   ngOnInit(): void {
     if (!this.api.getToken()) {
       this.router.navigate(['/login']);
@@ -80,6 +82,20 @@ export class StudentDashboard implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  // Переход к нужному разделу кабинета
+  scrollToSection(sectionId: string): void {
+    this.activeSection = sectionId;
+
+    setTimeout(() => {
+      const section = document.getElementById(sectionId);
+
+      section?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
   }
 
   get totalAppointments(): number {
@@ -127,7 +143,9 @@ export class StudentDashboard implements OnInit {
   }
 
   getPeriod(periodId: number): ReceptionPeriod | undefined {
-    return this.periods.find((period) => period.id === periodId);
+    return this.periods.find(
+      (period) => Number(period.id) === Number(periodId),
+    );
   }
 
   get studentName(): string {

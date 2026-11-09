@@ -1,3 +1,4 @@
+
 <div class="dashboard">
 
   <aside class="sidebar">
@@ -135,7 +136,7 @@
         </section>
 
 
-        <section class="content-section" id="appointments">
+        <section class="content-section">
 
           <div class="section-heading">
             <div>
@@ -171,6 +172,10 @@
                   </p>
                 }
 
+                <p>
+                  Номер в очереди: {{ appointment.queue_number }}
+                </p>
+
                 <span class="appointment-status">
                   {{ getStatusLabel(appointment.status) }}
                 </span>
@@ -196,7 +201,7 @@
         </section>
 
 
-        <section class="content-section">
+        <section class="content-section" id="appointments">
 
           <div class="section-heading">
             <div>
@@ -232,6 +237,10 @@
                     } @else {
                       <p>Информация о времени пока недоступна</p>
                     }
+
+                    <p>
+                      Номер в очереди: {{ appointment.queue_number }}
+                    </p>
                   </div>
 
                   <div class="appointment-card-status">
