@@ -21,6 +21,8 @@ export class DeanDashboard implements OnInit {
   private api = inject(ApiService);
 
   user: User | null = null;
+  userLoading = true;
+
   periods: ReceptionPeriod[] = [];
   queue: QueueItem[] = [];
 
@@ -36,24 +38,59 @@ export class DeanDashboard implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  get deanName(): string {
+    return this.user?.full_name?.trim() || '';
+  }
+
+  get deanInitial(): string {
+    return this.deanName
+      ? this.deanName.charAt(0).toUpperCase()
+      : 'Д';
+  }
+
   ngOnInit(): void {
+    if (!this.api.getToken()) {
+      window.location.href = '/login';
+      return;
+    }
+
     this.loadDashboard();
   }
 
   loadDashboard(): void {
     this.loading = true;
+    this.userLoading = true;
     this.errorMessage = '';
 
+    // Загружаем профиль пользователя
     this.api.getMe().subscribe({
       next: (user) => {
         this.user = user;
+        this.userLoading = false;
+
+        if (user.role !== 'dean') {
+          this.api.logout();
+          window.location.href = '/login';
+        }
       },
-      error: () => {
+      error: (error) => {
+        this.user = null;
+        this.userLoading = false;
+
+        console.error('Ошибка загрузки профиля декана:', error);
+
+        if (error.status === 401) {
+          this.api.logout();
+          window.location.href = '/login';
+          return;
+        }
+
         this.errorMessage =
-          'Не удалось загрузить данные пользователя.';
+          'Не удалось загрузить профиль пользователя. Попробуйте обновить страницу.';
       },
     });
 
+    // Загружаем приёмные периоды
     this.api.getPeriods().subscribe({
       next: (periods) => {
         this.periods = periods;
@@ -63,10 +100,19 @@ export class DeanDashboard implements OnInit {
           this.selectPeriod(periods[0]);
         }
       },
-      error: () => {
+      error: (error) => {
         this.loading = false;
+
+        console.error('Ошибка загрузки приёмных периодов:', error);
+
+        if (error.status === 401) {
+          this.api.logout();
+          window.location.href = '/login';
+          return;
+        }
+
         this.errorMessage =
-          'Не удалось загрузить приёмные периоды. Проверьте авторизацию.';
+          'Не удалось загрузить приёмные периоды. Проверьте подключение к серверу.';
       },
     });
   }
@@ -88,9 +134,18 @@ export class DeanDashboard implements OnInit {
         this.queue = queue;
         this.queueLoading = false;
       },
-      error: () => {
+      error: (error) => {
         this.queue = [];
         this.queueLoading = false;
+
+        console.error('Ошибка загрузки очереди:', error);
+
+        if (error.status === 401) {
+          this.api.logout();
+          window.location.href = '/login';
+          return;
+        }
+
         this.errorMessage = 'Не удалось загрузить очередь.';
       },
     });
@@ -117,6 +172,9 @@ export class DeanDashboard implements OnInit {
       },
       error: (error) => {
         this.actionLoading = false;
+
+        console.error('Ошибка вызова студента:', error);
+
         this.errorMessage =
           error.error?.detail ||
           'Не удалось вызвать следующего студента.';
@@ -166,6 +224,9 @@ export class DeanDashboard implements OnInit {
       },
       error: (error) => {
         this.actionLoading = false;
+
+        console.error('Ошибка сохранения результата:', error);
+
         this.errorMessage =
           error.error?.detail ||
           'Не удалось сохранить результат.';
