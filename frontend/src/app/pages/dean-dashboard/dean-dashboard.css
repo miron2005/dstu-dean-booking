@@ -16,8 +16,6 @@
   background: #f4f5f8;
 }
 
-/* Боковая панель */
-
 .sidebar {
   width: 260px;
   min-width: 260px;
@@ -30,34 +28,20 @@
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   padding: 5px 8px 30px;
 }
 
-.logo-icon {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  background: #a98242;
-  color: white;
-  font-size: 23px;
-  font-weight: bold;
-}
-
-.logo strong,
-.logo span {
+.logo-text strong,
+.logo-text span {
   display: block;
 }
 
-.logo strong {
+.logo-text strong {
   font-size: 19px;
+  font-weight: 700;
 }
 
-.logo span {
+.logo-text span {
   margin-top: 5px;
   color: #b9bdc5;
   font-size: 11px;
@@ -78,27 +62,19 @@
 }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
   width: 100%;
   padding: 13px 14px;
-  border: none;
+  border: 0;
   border-radius: 8px;
   color: #d5d8de;
   background: transparent;
-  text-decoration: none;
   text-align: left;
+  text-decoration: none;
   font-family: inherit;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.nav-item span {
-  width: 20px;
-  text-align: center;
-  font-size: 17px;
+  transition: background 0.2s, color 0.2s;
 }
 
 .nav-item:hover,
@@ -115,8 +91,6 @@
 .logout-button:hover {
   background: #963f3f;
 }
-
-/* Основная область */
 
 .main-content {
   flex: 1;
@@ -142,6 +116,7 @@
 .topbar h1 {
   margin: 9px 0 0;
   font-size: 26px;
+  font-weight: 700;
 }
 
 .user-mini {
@@ -153,6 +128,7 @@
 .avatar {
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -161,22 +137,20 @@
   font-weight: bold;
 }
 
-.user-mini strong,
-.user-mini span {
+.user-mini-info strong,
+.user-mini-info span {
   display: block;
 }
 
-.user-mini strong {
+.user-mini-info strong {
   font-size: 13px;
 }
 
-.user-mini span {
+.user-mini-info span {
   margin-top: 4px;
   color: #858b96;
   font-size: 12px;
 }
-
-/* Приветственный блок */
 
 .welcome {
   position: relative;
@@ -188,7 +162,20 @@
   margin-bottom: 25px;
   border-radius: 14px;
   color: white;
-  background: linear-gradient(115deg, #34312d, #675035);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(30, 37, 48, 0.88) 0%,
+      rgba(30, 37, 48, 0.72) 55%,
+      rgba(30, 37, 48, 0.48) 100%
+    ),
+    url('/dgtu-building.jpg') center 45% / cover no-repeat;
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
 }
 
 .welcome-label {
@@ -201,6 +188,7 @@
 .welcome h2 {
   margin: 14px 0 9px;
   font-size: 25px;
+  line-height: 1.3;
 }
 
 .welcome p {
@@ -210,17 +198,6 @@
   font-size: 14px;
   line-height: 1.6;
 }
-
-.welcome-decoration {
-  position: absolute;
-  right: 35px;
-  color: rgba(255, 255, 255, 0.08);
-  font-size: 70px;
-  font-weight: 900;
-  pointer-events: none;
-}
-
-/* Сообщения */
 
 .message {
   padding: 13px 16px;
@@ -241,8 +218,6 @@
   border: 1px solid #ccebd8;
 }
 
-/* Статистика */
-
 .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -253,43 +228,13 @@
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 15px;
   min-width: 0;
+  min-height: 116px;
   padding: 20px;
   background: white;
   border: 1px solid #e9eaf0;
   border-radius: 12px;
   box-shadow: 0 3px 12px rgba(30, 40, 60, 0.035);
-}
-
-.stat-icon {
-  width: 43px;
-  height: 43px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  font-size: 19px;
-}
-
-.gold {
-  background: #f8eedc;
-  color: #a98242;
-}
-
-.green {
-  background: #e4f4eb;
-  color: #319b63;
-}
-
-.blue {
-  background: #e7effc;
-  color: #4b79c5;
-}
-
-.orange {
-  background: #fff0e3;
-  color: #d88a3b;
 }
 
 .stat-card span,
@@ -304,16 +249,15 @@
 }
 
 .stat-card strong {
-  margin: 5px 0;
-  font-size: 25px;
+  margin: 7px 0;
+  font-size: 27px;
+  line-height: 1.2;
 }
 
 .stat-card small {
   color: #9a9faa;
   font-size: 11px;
 }
-
-/* Секции */
 
 .section {
   margin-bottom: 30px;
@@ -336,9 +280,8 @@
   margin: 6px 0 0;
   color: #858b96;
   font-size: 13px;
+  line-height: 1.5;
 }
-
-/* Кнопки */
 
 .primary-button,
 .success-button,
@@ -407,14 +350,13 @@
   font-family: inherit;
   font-size: 12px;
   cursor: pointer;
+  transition: color 0.2s, background 0.2s;
 }
 
 .outline-button:hover {
   color: white;
   background: #a98242;
 }
-
-/* Приёмные периоды */
 
 .period-grid {
   display: grid;
@@ -505,8 +447,6 @@
   background: #a98242;
 }
 
-/* Очередь */
-
 .queue-list {
   overflow: hidden;
   padding: 5px 20px;
@@ -562,8 +502,6 @@
   font-size: 11px;
 }
 
-/* Статусы */
-
 .status {
   display: inline-block;
   flex-shrink: 0;
@@ -592,8 +530,6 @@
   color: #a34a4a;
   background: #fdeaea;
 }
-
-/* Результат приёма */
 
 .result-section {
   padding: 22px;
@@ -636,8 +572,6 @@
   margin-top: 15px;
 }
 
-/* Пустые состояния и загрузка */
-
 .empty-state {
   padding: 35px 20px;
   text-align: center;
@@ -646,13 +580,8 @@
   border-radius: 12px;
 }
 
-.empty-icon {
-  color: #b18b50;
-  font-size: 35px;
-}
-
 .empty-state h3 {
-  margin: 12px 0 7px;
+  margin: 0 0 7px;
   font-size: 16px;
 }
 
@@ -660,14 +589,17 @@
 .loading {
   color: #858b96;
   font-size: 13px;
+  line-height: 1.5;
+}
+
+.empty-state p {
+  margin: 0;
 }
 
 .loading {
   padding: 25px;
   text-align: center;
 }
-
-/* Подвал */
 
 .footer {
   display: flex;
@@ -678,8 +610,6 @@
   color: #9298a2;
   font-size: 11px;
 }
-
-/* Адаптация */
 
 @media (max-width: 1200px) {
   .stats {
@@ -729,8 +659,8 @@
     padding: 18px 14px;
   }
 
-  .topbar,
-  .topbar-right {
+  .topbar {
+    align-items: flex-start;
     flex-wrap: wrap;
   }
 
@@ -742,18 +672,14 @@
     font-size: 21px;
   }
 
-  .welcome-decoration {
-    display: none;
-  }
-
   .stats {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
   .stat-card {
+    min-height: 105px;
     padding: 13px;
-    gap: 9px;
   }
 
   .stat-card strong {

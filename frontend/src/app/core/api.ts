@@ -1,36 +1,14 @@
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+// Факультеты
 
 export interface Faculty {
   id: number;
   name: string;
   is_active: boolean;
-}
-
-export interface User {
-  id: number;
-  full_name: string;
-  email: string;
-  role: string;
-  faculty_id: number | null;
-  is_active: boolean;
-}
-
-export interface UserCreate {
-  full_name: string;
-  email: string;
-  password: string;
-  role: 'student' | 'secretary' | 'dean' | 'admin';
-  faculty_id: number | null;
-}
-
-export interface UserUpdate {
-  full_name?: string;
-  role?: 'student' | 'secretary' | 'dean' | 'admin';
-  faculty_id?: number | null;
-  is_active?: boolean;
 }
 
 export interface FacultyCreate {
@@ -42,17 +20,49 @@ export interface FacultyUpdate {
   is_active?: boolean;
 }
 
+// Пользователи
+
+export interface User {
+  id: number;
+  full_name: string;
+  email: string;
+  role: string;
+  faculty_id: number | null;
+  is_active: boolean;
+}
+
 export interface RegisterData {
   full_name: string;
   email: string;
   password: string;
-  faculty_id: number;
+  faculty_id?: number | null;
 }
+
+export interface UserCreate {
+  full_name: string;
+  email: string;
+  password: string;
+  role: string;
+  faculty_id?: number | null;
+}
+
+export interface UserUpdate {
+  full_name?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+  faculty_id?: number | null;
+  is_active?: boolean;
+}
+
+// Авторизация
 
 export interface TokenResponse {
   access_token: string;
   token_type: string;
 }
+
+// Периоды приёма
 
 export interface ReceptionPeriod {
   id: number;
@@ -73,11 +83,31 @@ export interface PeriodCreate {
 }
 
 export interface PeriodUpdate {
-  dean_id?: number;
   starts_at?: string;
   ends_at?: string;
   capacity?: number;
+  status?: string;
 }
+
+// Темы обращений
+
+export interface AppealTopic {
+  id: number;
+  faculty_id: number;
+  title: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+// Создание записи студента
+
+export interface AppointmentCreate {
+  period_id: number;
+  topic_id: number;
+  question: string;
+}
+
+// Очередь
 
 export interface QueueItem {
   id: number;
@@ -92,17 +122,49 @@ export interface QueueItem {
 }
 
 export interface AppointmentResult {
-  status: 'accepted' | 'no_show';
-  result_comment: string | null;
+  status: string;
+  result_comment?: string | null;
+}
+
+// Личные записи студента
+
+export interface StudentAppointment {
+  id: number;
+  period_id: number;
+  topic_id: number;
+  question: string;
+  queue_number: number;
+  status: string;
+  created_at: string;
+}
+
+// Уведомления
+
+export interface StudentNotification {
+  id: number;
+  appointment_id: number | null;
+  kind: string;
+  message: string;
+  created_at: string;
+  read_at: string | null;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly baseUrl = 'http://127.0.0.1:8000';
   private readonly http = inject(HttpClient);
-  private readonly tokenKey = 'deanery_access_token';
+  private readonly baseUrl = 'http://127.0.0.1:8000';
+
+  // Заголовки авторизации
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+  }
 
   // Авторизация
 
@@ -115,6 +177,7 @@ export class ApiService {
 
   login(email: string, password: string): Observable<TokenResponse> {
     const body = new URLSearchParams();
+
     body.set('username', email);
     body.set('password', password);
 
@@ -136,12 +199,12 @@ export class ApiService {
     );
   }
 
-  logout(): void {
-    localStorage.removeItem(this.tokenKey);
+  getToken(): string | null {
+    return localStorage.getItem('deanery_access_token');
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+  logout(): void {
+    localStorage.removeItem('deanery_access_token');
   }
 
   // Факультеты
@@ -161,11 +224,11 @@ export class ApiService {
   }
 
   updateFaculty(
-    id: number,
+    facultyId: number,
     data: FacultyUpdate,
   ): Observable<Faculty> {
     return this.http.patch<Faculty>(
-      `${this.baseUrl}/faculties/${id}`,
+      `${this.baseUrl}/faculties/${facultyId}`,
       data,
       { headers: this.getAuthHeaders() },
     );
@@ -188,18 +251,15 @@ export class ApiService {
     );
   }
 
-  updateUser(
-    id: number,
-    data: UserUpdate,
-  ): Observable<User> {
+  updateUser(userId: number, data: UserUpdate): Observable<User> {
     return this.http.patch<User>(
-      `${this.baseUrl}/users/${id}`,
+      `${this.baseUrl}/users/${userId}`,
       data,
       { headers: this.getAuthHeaders() },
     );
   }
 
-  // Приёмные периоды
+  // Периоды приёма
 
   getPeriods(): Observable<ReceptionPeriod[]> {
     return this.http.get<ReceptionPeriod[]>(
@@ -217,25 +277,37 @@ export class ApiService {
   }
 
   updatePeriod(
-    id: number,
+    periodId: number,
     data: PeriodUpdate,
   ): Observable<ReceptionPeriod> {
     return this.http.patch<ReceptionPeriod>(
-      `${this.baseUrl}/periods/${id}`,
+      `${this.baseUrl}/periods/${periodId}`,
       data,
       { headers: this.getAuthHeaders() },
     );
   }
 
-  cancelPeriod(id: number): Observable<ReceptionPeriod> {
+  cancelPeriod(periodId: number): Observable<ReceptionPeriod> {
     return this.http.post<ReceptionPeriod>(
-      `${this.baseUrl}/periods/${id}/cancel`,
+      `${this.baseUrl}/periods/${periodId}/cancel`,
       {},
       { headers: this.getAuthHeaders() },
     );
   }
 
-  // Очередь студентов — для декана
+  // Темы обращений
+
+  getTopics(facultyId: number): Observable<AppealTopic[]> {
+    return this.http.get<AppealTopic[]>(
+      `${this.baseUrl}/topics`,
+      {
+        headers: this.getAuthHeaders(),
+        params: { faculty_id: facultyId },
+      },
+    );
+  }
+
+  // Очередь
 
   getQueue(periodId: number): Observable<QueueItem[]> {
     return this.http.get<QueueItem[]>(
@@ -263,13 +335,33 @@ export class ApiService {
     );
   }
 
-  // Заголовки авторизации
+  // Создание записи на приём
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.getToken();
+  createAppointment(
+    data: AppointmentCreate,
+  ): Observable<StudentAppointment> {
+    return this.http.post<StudentAppointment>(
+      `${this.baseUrl}/appointments`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
 
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
+  // Личные записи студента
+
+  getMyAppointments(): Observable<StudentAppointment[]> {
+    return this.http.get<StudentAppointment[]>(
+      `${this.baseUrl}/appointments/my`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Уведомления студента
+
+  getNotifications(): Observable<StudentNotification[]> {
+    return this.http.get<StudentNotification[]>(
+      `${this.baseUrl}/notifications`,
+      { headers: this.getAuthHeaders() },
+    );
   }
 }

@@ -94,12 +94,6 @@
   transition: 0.2s;
 }
 
-.nav-item span {
-  width: 20px;
-  text-align: center;
-  font-size: 17px;
-}
-
 .nav-item:hover,
 .nav-item.active {
   background: #363d48;
@@ -175,7 +169,7 @@
   font-size: 11px;
 }
 
-/* Приветственный блок */
+/* Приветственный блок с фотографией ДГТУ */
 
 .welcome {
   position: relative;
@@ -187,8 +181,20 @@
   padding: 30px 35px;
   border-radius: 15px;
   color: #fff;
-  background: linear-gradient(115deg, #303742, #454d59);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(30, 37, 48, 0.88) 0%,
+      rgba(30, 37, 48, 0.72) 55%,
+      rgba(30, 37, 48, 0.48) 100%
+    ),
+    url('/dgtu-building.jpg') center 45% / cover no-repeat;
   margin-bottom: 25px;
+}
+
+.welcome > div {
+  position: relative;
+  z-index: 1;
 }
 
 .welcome-label {
@@ -206,16 +212,9 @@
 .welcome p {
   max-width: 620px;
   margin: 0;
-  color: #c4c9d1;
+  color: #f0f1f3;
   font-size: 13px;
   line-height: 1.7;
-}
-
-.welcome-decoration {
-  color: rgba(255, 255, 255, 0.07);
-  font-size: 65px;
-  font-weight: 800;
-  letter-spacing: 3px;
 }
 
 /* Статистика */
@@ -236,31 +235,6 @@
   border: 1px solid #e9ebef;
   border-radius: 13px;
   background: #fff;
-}
-
-.stat-icon {
-  width: 45px;
-  height: 45px;
-  min-width: 45px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  font-size: 20px;
-}
-
-.stat-icon.gold {
-  background: #f5eddf;
-  color: #a98242;
-}
-
-.stat-icon.blue {
-  background: #e9f0fa;
-  color: #557cae;
-}
-
-.stat-icon.orange {
-  background: #fff0e3;
-  color: #d28b42;
 }
 
 .stat-card span,
@@ -531,18 +505,6 @@ td small {
   flex-wrap: wrap;
 }
 
-.faculty-icon {
-  width: 43px;
-  height: 43px;
-  min-width: 43px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: #f5eddf;
-  color: #a98242;
-  font-size: 20px;
-}
-
 .faculty-info {
   display: flex;
   flex: 1;
@@ -680,14 +642,11 @@ td small {
 
   .welcome {
     padding: 24px 20px;
+    background-position: center;
   }
 
   .welcome h2 {
     font-size: 20px;
-  }
-
-  .welcome-decoration {
-    display: none;
   }
 
   .stats {

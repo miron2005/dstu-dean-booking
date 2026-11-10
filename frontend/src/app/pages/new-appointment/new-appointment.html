@@ -1,90 +1,83 @@
 <div class="appointment-page">
 
-  <header class="page-header">
+  <header class="appointment-header">
     <div>
-      <span class="breadcrumb">Личный кабинет / Новая запись</span>
+      <div class="page-eyebrow">ЛИЧНЫЙ КАБИНЕТ СТУДЕНТА</div>
       <h1>Запись на приём</h1>
-      <p>Заполните форму, чтобы записаться на консультацию в деканат.</p>
+      <p>Выберите подходящее время из предложенных окон приёма.</p>
     </div>
 
-    <a routerLink="/student" class="back-button">← В личный кабинет</a>
+    <a routerLink="/student" class="back-button">Вернуться в кабинет</a>
   </header>
 
-  <div class="form-layout">
-
-    <section class="form-card">
-      <div class="card-heading">
-        <h2>Информация о записи</h2>
-        <p>Укажите необходимые данные для оформления обращения.</p>
-      </div>
-
-      <form>
-
-        <div class="form-group">
-          <label for="faculty">Факультет</label>
-          <select id="faculty" required>
-            <option value="">Выберите факультет</option>
-            <option>Факультет информационных технологий</option>
-            <option>Факультет экономики и управления</option>
-            <option>Факультет строительства и архитектуры</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="topic">Тема обращения</label>
-          <select id="topic" required>
-            <option value="">Выберите тему обращения</option>
-            <option>Учебные вопросы</option>
-            <option>Академическая задолженность</option>
-            <option>Перевод и восстановление</option>
-            <option>Стипендия и материальная помощь</option>
-            <option>Другой вопрос</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="date">Дата приёма</label>
-          <input type="date" id="date" required>
-        </div>
-
-        <div class="form-group">
-          <label for="time">Доступное время</label>
-          <select id="time" required>
-            <option value="">Сначала выберите дату</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="comment">Комментарий к обращению</label>
-          <textarea id="comment" rows="4"
-            placeholder="Кратко опишите причину обращения..."></textarea>
-        </div>
-
-        <div class="form-actions">
-          <a routerLink="/student" class="cancel-button">Отмена</a>
-          <button type="submit">Продолжить →</button>
-        </div>
-
-      </form>
-    </section>
-
-    <aside class="info-card">
-      <div class="info-icon">ⓘ</div>
-      <h3>Перед записью</h3>
-      <p>Обратите внимание на несколько важных моментов:</p>
-
-      <ul>
-        <li>Выберите свой факультет.</li>
-        <li>Укажите подходящую тему обращения.</li>
-        <li>Выберите удобные дату и время.</li>
-        <li>Проверьте данные перед отправкой.</li>
-      </ul>
-
-      <div class="info-note">
-        <strong>Важно</strong>
-        <p>После оформления записи дождитесь подтверждения обращения.</p>
-      </div>
-    </aside>
-
+  <div *ngIf="errorMessage" class="message error">
+    {{ errorMessage }}
   </div>
+
+  <div *ngIf="successMessage" class="message success">
+    {{ successMessage }}
+  </div>
+
+  <section class="periods-section">
+
+    <div class="section-heading">
+      <div>
+        <h2>Доступные окна</h2>
+        <p>Выберите одно свободное время для посещения деканата.</p>
+      </div>
+
+      <span class="periods-count" *ngIf="!loading">
+        Доступно: {{ periods.length }}
+      </span>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      Загружаем доступные окна...
+    </div>
+
+    <div *ngIf="!loading && periods.length > 0" class="periods-list">
+
+      <article class="period-card" *ngFor="let period of periods">
+
+        <div class="period-date-block">
+          <span class="date-label">ДАТА ПРИЁМА</span>
+          <strong>{{ period.starts_at | date:'dd.MM.yyyy' }}</strong>
+        </div>
+
+        <div class="period-time-block">
+          <span class="date-label">ВРЕМЯ</span>
+          <strong>
+            {{ period.starts_at | date:'HH:mm' }}
+            –
+            {{ period.ends_at | date:'HH:mm' }}
+          </strong>
+        </div>
+
+        <div class="period-places-block">
+          <span class="date-label">СВОБОДНЫЕ МЕСТА</span>
+          <strong>{{ period.free_places }}</strong>
+        </div>
+
+        <button
+          type="button"
+          class="book-button"
+          [disabled]="savingPeriodId !== null"
+          (click)="bookPeriod(period)"
+        >
+          {{ savingPeriodId === period.id ? 'Записываем...' : 'Записаться' }}
+        </button>
+
+      </article>
+
+    </div>
+
+    <div *ngIf="!loading && periods.length === 0" class="empty-state">
+      <h3>Свободных окон пока нет</h3>
+      <p>
+        Секретарь ещё не открыл запись или все места уже заняты.
+        Попробуйте проверить страницу позднее.
+      </p>
+    </div>
+
+  </section>
 </div>
