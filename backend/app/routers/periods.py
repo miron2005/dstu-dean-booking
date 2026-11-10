@@ -1,6 +1,7 @@
+from datetime import date, datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.deps import SessionDep, require_role
 from app.models import User
@@ -15,9 +16,15 @@ router = APIRouter(prefix="/periods", tags=["periods"])
 def get_periods(
     user: Annotated[User, Depends(require_role("student", "secretary", "dean"))],
     session: SessionDep,
+    day: Annotated[date | None, Query(alias="date")] = None,
+    only_available: bool = False,
 ):
-    periods = PeriodRepository.get_all(user.faculty_id, session)
-    return [service.to_out(session, period) for period in periods]
+    periods = PeriodRepository.get_all(user.faculty_id, session, day)
+    result = [service.to_out(session, period) for period in periods]
+    if only_available:
+        now = datetime.now(timezone.utc)
+        result = [p for p in result if p.status == "open" and p.free_places > 0 and p.starts_at > now]
+    return result
 
 
 @router.post("", response_model=SPeriod, status_code=status.HTTP_201_CREATED)

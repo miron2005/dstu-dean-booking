@@ -1,3 +1,5 @@
+from datetime import date, datetime, time, timedelta, timezone
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -6,12 +8,18 @@ from app.models import Appointment, ReceptionPeriod
 
 class PeriodRepository:
     @classmethod
-    def get_all(cls, faculty_id: int, session: Session):
+    def get_all(cls, faculty_id: int, session: Session, day: date | None = None):
         query = (
             select(ReceptionPeriod)
             .where(ReceptionPeriod.faculty_id == faculty_id)
             .order_by(ReceptionPeriod.starts_at)
         )
+        if day is not None:
+            start = datetime.combine(day, time.min, tzinfo=timezone.utc)
+            query = query.where(
+                ReceptionPeriod.starts_at >= start,
+                ReceptionPeriod.starts_at < start + timedelta(days=1),
+            )
         return session.scalars(query).all()
 
     @classmethod
