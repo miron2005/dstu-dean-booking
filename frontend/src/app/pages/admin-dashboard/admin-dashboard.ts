@@ -1,5 +1,10 @@
 
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -23,6 +28,7 @@ type UserRole = 'student' | 'secretary' | 'dean' | 'admin';
 })
 export class AdminDashboard implements OnInit {
   private api = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   activeTab: AdminTab = 'users';
 
@@ -99,13 +105,17 @@ export class AdminDashboard implements OnInit {
           next: faculties => {
             this.faculties = faculties;
             this.loading = false;
+
+            this.cdr.detectChanges();
           },
           error: err => {
             this.error = this.getErrorMessage(
               err,
               'Не удалось загрузить факультеты',
             );
+
             this.loading = false;
+            this.cdr.detectChanges();
           },
         });
       },
@@ -114,7 +124,9 @@ export class AdminDashboard implements OnInit {
           err,
           'Не удалось загрузить пользователей',
         );
+
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

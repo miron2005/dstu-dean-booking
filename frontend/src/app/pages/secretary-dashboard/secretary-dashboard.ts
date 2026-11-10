@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,6 +18,7 @@ export class SecretaryDashboard implements OnInit {
 
   loading = false;
   saving = false;
+
   errorMessage = '';
   successMessage = '';
 
@@ -32,6 +34,7 @@ export class SecretaryDashboard implements OnInit {
   constructor(
     private api: ApiService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +51,9 @@ export class SecretaryDashboard implements OnInit {
         }
 
         this.user = user;
+        this.cdr.detectChanges();
+
+        // Автоматически загружаем периоды после входа в кабинет
         this.loadPeriods();
       },
       error: () => {
@@ -57,22 +63,48 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
+  get activePeriodsCount(): number {
+    return this.periods.filter(
+      (period) => period.status === 'open',
+    ).length;
+  }
+
+  get cancelledPeriodsCount(): number {
+    return this.periods.filter(
+      (period) => period.status === 'cancelled',
+    ).length;
+  }
+
+  get freePlacesCount(): number {
+    return this.periods.reduce(
+      (sum, period) => sum + Number(period.free_places || 0),
+      0,
+    );
+  }
+
+  // Загрузка периодов
   loadPeriods(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.api.getPeriods().subscribe({
       next: (periods) => {
         this.periods = periods;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorMessage = 'Не удалось загрузить периоды приёма';
+      error: (error) => {
+        this.errorMessage =
+          error.error?.detail || 'Не удалось загрузить периоды приёма';
+
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
 
+  // Создание или редактирование периода
   submitForm(): void {
     this.errorMessage = '';
     this.successMessage = '';
@@ -81,7 +113,8 @@ export class SecretaryDashboard implements OnInit {
       !this.form.dean_id ||
       !this.form.starts_at ||
       !this.form.ends_at ||
-      this.form.capacity < 1
+      !Number.isInteger(Number(this.form.capacity)) ||
+      Number(this.form.capacity) < 1
     ) {
       this.errorMessage = 'Заполните все поля корректно';
       return;
@@ -89,6 +122,14 @@ export class SecretaryDashboard implements OnInit {
 
     const startsAt = new Date(this.form.starts_at);
     const endsAt = new Date(this.form.ends_at);
+
+    if (
+      Number.isNaN(startsAt.getTime()) ||
+      Number.isNaN(endsAt.getTime())
+    ) {
+      this.errorMessage = 'Указана некорректная дата';
+      return;
+    }
 
     if (endsAt <= startsAt) {
       this.errorMessage = 'Время окончания должно быть позже начала';
@@ -103,29 +144,37 @@ export class SecretaryDashboard implements OnInit {
     };
 
     this.saving = true;
+    this.cdr.detectChanges();
 
-    const request = this.editingId
-      ? this.api.updatePeriod(this.editingId, data)
+    const isEditing = this.editingId !== null;
+
+    const request = isEditing
+      ? this.api.updatePeriod(this.editingId!, data)
       : this.api.createPeriod(data);
 
     request.subscribe({
       next: () => {
-        this.successMessage = this.editingId
+        this.successMessage = isEditing
           ? 'Период приёма обновлён'
           : 'Период приёма создан';
 
         this.resetForm();
-        this.loadPeriods();
         this.saving = false;
+
+        this.loadPeriods();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error.error?.detail || 'Не удалось сохранить период приёма';
+
         this.saving = false;
+        this.cdr.detectChanges();
       },
     });
   }
 
+  // Заполнение формы данными выбранного периода
   editPeriod(period: ReceptionPeriod): void {
     this.editingId = period.id;
 
@@ -139,9 +188,15 @@ export class SecretaryDashboard implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.cdr.detectChanges();
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   }
 
+  // Отмена периода
   cancelPeriod(period: ReceptionPeriod): void {
     const confirmed = window.confirm(
       'Вы действительно хотите отменить этот период приёма?',
@@ -151,18 +206,25 @@ export class SecretaryDashboard implements OnInit {
       return;
     }
 
+    this.errorMessage = '';
+    this.successMessage = '';
+
     this.api.cancelPeriod(period.id).subscribe({
       next: () => {
         this.successMessage = 'Период приёма отменён';
         this.loadPeriods();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error.error?.detail || 'Не удалось отменить период';
+
+        this.cdr.detectChanges();
       },
     });
   }
 
+  // Сброс формы
   resetForm(): void {
     this.editingId = null;
 
@@ -174,13 +236,16 @@ export class SecretaryDashboard implements OnInit {
     };
   }
 
+  // Выход из системы
   logout(): void {
     this.api.logout();
     this.router.navigate(['/login']);
   }
 
+  // Название статуса
   getStatusLabel(status: string): string {
     const statuses: Record<string, string> = {
+      open: 'Активен',
       active: 'Активен',
       cancelled: 'Отменён',
       completed: 'Завершён',
@@ -190,6 +255,12 @@ export class SecretaryDashboard implements OnInit {
     return statuses[status] || status;
   }
 
+  // CSS-класс статуса
+  getStatusClass(status: string): string {
+    return status === 'open' ? 'active' : status;
+  }
+
+  // Преобразование даты для input datetime-local
   private toLocalDateTime(value: string): string {
     const date = new Date(value);
     const offset = date.getTimezoneOffset();

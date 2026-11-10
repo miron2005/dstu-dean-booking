@@ -1,10 +1,8 @@
 
 <div class="dashboard">
-  <!-- Боковая панель -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-icon">Д</div>
-      <div>
+      <div class="logo-text">
         <strong>Деканат</strong>
         <span>Система записи на приём</span>
       </div>
@@ -13,61 +11,47 @@
     <div class="sidebar-title">РАБОЧЕЕ МЕСТО</div>
 
     <nav class="navigation">
-      <a class="nav-item active" href="javascript:void(0)">
-        <span>▦</span>
-        Главная
-      </a>
-      <a class="nav-item" href="#periods">
-        <span>◷</span>
-        Приёмные периоды
-      </a>
-      <a class="nav-item" href="#queue">
-        <span>☷</span>
-        Очередь студентов
-      </a>
+      <a class="nav-item active" href="#top">Главная</a>
+      <a class="nav-item" href="#periods">Приёмные периоды</a>
+      <a class="nav-item" href="#queue">Очередь студентов</a>
     </nav>
 
     <div class="sidebar-bottom">
       <button class="nav-item logout-button" (click)="logout()">
-        <span>↪</span>
         Выйти из аккаунта
       </button>
     </div>
   </aside>
 
-  <!-- Основная область -->
-  <main class="main-content">
+  <main class="main-content" id="top">
     <header class="topbar">
       <div>
-        <div class="breadcrumb">Рабочее место / Декан</div>
+        <div class="breadcrumb">Главная / Кабинет декана</div>
         <h1>Панель управления</h1>
       </div>
 
       <div class="user-mini">
         <div class="avatar">
-          {{ user?.full_name?.charAt(0) || 'Д' }}
+          {{ user?.full_name?.charAt(0)?.toUpperCase() || 'Д' }}
         </div>
-        <div>
-          <strong>{{ user?.full_name || 'Декан' }}</strong>
+        <div class="user-mini-info">
+          <strong>{{ user?.full_name || 'Пользователь' }}</strong>
           <span>Декан факультета</span>
         </div>
       </div>
     </header>
 
-    <!-- Приветствие -->
     <section class="welcome">
-      <div>
-        <div class="welcome-label">ЛИЧНЫЙ КАБИНЕТ ДЕКАНА</div>
+      <div class="welcome-content">
+        <span class="welcome-label">ЛИЧНЫЙ КАБИНЕТ</span>
         <h2>Добро пожаловать, {{ user?.full_name || 'уважаемый декан' }}!</h2>
         <p>
-          Здесь вы можете управлять приёмом студентов,
-          просматривать очередь и фиксировать результаты встреч.
+          Управляйте приёмом студентов, просматривайте очередь
+          и фиксируйте результаты встреч в одном месте.
         </p>
       </div>
-      <div class="welcome-decoration">DEAN</div>
     </section>
 
-    <!-- Сообщения -->
     <div class="message error-message" *ngIf="errorMessage">
       {{ errorMessage }}
     </div>
@@ -76,46 +60,40 @@
       {{ successMessage }}
     </div>
 
-    <!-- Статистика -->
     <section class="stats">
-      <div class="stat-card">
-        <div class="stat-icon gold">◷</div>
+      <article class="stat-card">
         <div>
-          <span>Приёмных периодов</span>
+          <span>Приёмные периоды</span>
           <strong>{{ periods.length }}</strong>
           <small>Всего доступно</small>
         </div>
-      </div>
+      </article>
 
-      <div class="stat-card">
-        <div class="stat-icon blue">☷</div>
+      <article class="stat-card">
         <div>
           <span>Записано студентов</span>
           <strong>{{ queue.length }}</strong>
           <small>В выбранном периоде</small>
         </div>
-      </div>
+      </article>
 
-      <div class="stat-card">
-        <div class="stat-icon orange">◉</div>
+      <article class="stat-card">
         <div>
           <span>Ожидают приёма</span>
           <strong>{{ activeCount }}</strong>
           <small>Активные записи</small>
         </div>
-      </div>
+      </article>
 
-      <div class="stat-card">
-        <div class="stat-icon green">✓</div>
+      <article class="stat-card">
         <div>
           <span>Вызваны</span>
           <strong>{{ calledCount }}</strong>
           <small>Ожидают завершения приёма</small>
         </div>
-      </div>
+      </article>
     </section>
 
-    <!-- Приёмные периоды -->
     <section class="section" id="periods">
       <div class="section-heading">
         <div>
@@ -129,7 +107,6 @@
       </div>
 
       <div class="empty-state" *ngIf="!loading && periods.length === 0">
-        <div class="empty-icon">◷</div>
         <h3>Приёмных периодов пока нет</h3>
         <p>Когда секретарь создаст период приёма, он появится здесь.</p>
       </div>
@@ -172,7 +149,6 @@
       </div>
     </section>
 
-    <!-- Очередь студентов -->
     <section class="section" id="queue">
       <div class="section-heading">
         <div>
@@ -202,7 +178,6 @@
         class="empty-state"
         *ngIf="!queueLoading && selectedPeriod && queue.length === 0"
       >
-        <div class="empty-icon">☷</div>
         <h3>Очередь пока пуста</h3>
         <p>На этот приёмный период ещё никто не записался.</p>
       </div>
@@ -222,10 +197,7 @@
             </small>
           </div>
 
-          <span
-            class="status"
-            [ngClass]="appointment.status"
-          >
+          <span class="status" [ngClass]="appointment.status">
             {{ getStatusLabel(appointment.status) }}
           </span>
 
@@ -240,7 +212,6 @@
       </div>
     </section>
 
-    <!-- Завершение приёма -->
     <section class="section result-section" *ngIf="selectedAppointment">
       <div class="section-heading">
         <div>
@@ -258,7 +229,7 @@
         <textarea
           id="resultComment"
           [(ngModel)]="resultComment"
-          placeholder="Например: вопрос решён, выданы необходимые рекомендации..."
+          placeholder="Введите комментарий по итогам приёма..."
           rows="4"
         ></textarea>
 

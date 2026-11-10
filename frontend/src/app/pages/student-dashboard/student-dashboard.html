@@ -1,236 +1,410 @@
 
 <div class="dashboard">
 
-  <!-- Боковая панель -->
   <aside class="sidebar">
-    <div class="logo">
-      <img src="/logo-dgtu.png" alt="ДГТУ">
-      <div>
-        <strong>ДГТУ</strong>
-        <span>Электронная запись</span>
-      </div>
+    <div class="sidebar-logo">
+      <span>Личный кабинет</span>
     </div>
-
-    <div class="sidebar-title">МЕНЮ</div>
 
     <nav class="navigation">
       <a routerLink="/student" class="nav-item active">
-        <span>▦</span> Главная
+        Главная
       </a>
 
       <a href="#appointments" class="nav-item">
-        <span>▣</span> Мои записи
+        Мои записи
       </a>
 
       <a routerLink="/student/new-appointment" class="nav-item">
-        <span>＋</span> Записаться на приём
+        Записаться на приём
       </a>
 
       <a href="#notifications" class="nav-item">
-        <span>♧</span> Уведомления
+        Уведомления
       </a>
 
       <a href="#profile" class="nav-item">
-        <span>♙</span> Мой профиль
+        Мой профиль
       </a>
     </nav>
 
     <div class="sidebar-bottom">
-      <a routerLink="/" class="nav-item">
-        <span>↩</span> Выйти
+      <a
+        routerLink="/login"
+        class="nav-item"
+        (click)="logout()"
+      >
+        Выйти из аккаунта
       </a>
     </div>
   </aside>
 
-  <!-- Основная часть -->
+
   <main class="main-content">
 
     <header class="topbar">
-      <div>
-        <span class="breadcrumb">Личный кабинет / Главная</span>
-        <h1>Личный кабинет</h1>
+      <div class="topbar-left">
+        <h1>Главная</h1>
       </div>
 
       <div class="topbar-right">
-        <button class="notification-button" aria-label="Уведомления">
-          ♧
-          <span class="notification-dot"></span>
-        </button>
+        <a href="#notifications" class="notification-button">
+          Уведомления
+
+          @if (unreadNotifications > 0) {
+            <span class="notification-count">
+              {{ unreadNotifications }}
+            </span>
+          }
+        </a>
 
         <div class="user-mini">
-          <div class="avatar">ИП</div>
-          <div>
-            <strong>Иван Петров</strong>
+          <div class="avatar">
+            {{ initials }}
+          </div>
+
+          <div class="user-mini-info">
+            <strong>{{ studentName }}</strong>
             <span>Студент</span>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Приветственный блок -->
-    <section class="welcome">
-      <div>
-        <span class="welcome-label">ЭЛЕКТРОННАЯ ЗАПИСЬ К ДЕКАНУ</span>
-        <h2>Здравствуйте, Иван!</h2>
-        <p>
-          Здесь вы можете записаться на приём, следить за своими
-          обращениями и получать уведомления.
-        </p>
-      </div>
 
-      <div class="welcome-decoration">ДГТУ</div>
-    </section>
+    <section class="dashboard-content">
 
-    <!-- Статистика -->
-    <section class="stats">
-
-      <article class="stat-card">
-        <div class="stat-icon gold">▣</div>
-        <div>
-          <span>Всего записей</span>
-          <strong>5</strong>
-          <small>За всё время</small>
+      @if (loading) {
+        <div class="loading-state">
+          <p>Загружаем данные личного кабинета...</p>
         </div>
-      </article>
+      }
 
-      <article class="stat-card">
-        <div class="stat-icon green">✓</div>
-        <div>
-          <span>Предстоящие</span>
-          <strong>1</strong>
-          <small>Ожидают приёма</small>
+      @if (!loading && errorMessage) {
+        <div class="error-state">
+          {{ errorMessage }}
         </div>
-      </article>
+      }
 
-      <article class="stat-card">
-        <div class="stat-icon blue">◷</div>
-        <div>
-          <span>Завершённые</span>
-          <strong>4</strong>
-          <small>Приёмы состоялись</small>
-        </div>
-      </article>
+      @if (!loading && !errorMessage) {
 
-      <article class="stat-card">
-        <div class="stat-icon orange">♧</div>
-        <div>
-          <span>Уведомления</span>
-          <strong>2</strong>
-          <small>Непрочитанные</small>
-        </div>
-      </article>
-
-    </section>
-
-    <!-- Ближайший приём -->
-    <section class="section" id="appointments">
-      <div class="section-heading">
-        <div>
-          <h2>Ближайший приём</h2>
-          <p>Информация о вашей следующей встрече</p>
-        </div>
-
-        <a href="#all-appointments">Все записи →</a>
-      </div>
-
-      <article class="appointment-card">
-        <div class="appointment-date">
-          <span>НОЯ</span>
-          <strong>12</strong>
-          <small>ЧЕТВЕРГ</small>
-        </div>
-
-        <div class="appointment-info">
-          <span class="status confirmed">Подтверждена</span>
-          <h3>Консультация по учебному вопросу</h3>
-          <p>Факультет информационных технологий</p>
-
-          <div class="appointment-meta">
-            <span>◷ 14:30</span>
-            <span>♙ Приём у декана</span>
-          </div>
-        </div>
-
-        <div class="appointment-action">
-          <button class="outline-button">Подробнее</button>
-        </div>
-      </article>
-    </section>
-
-    <!-- Быстрые действия -->
-    <section class="section" id="new-appointment">
-      <div class="section-heading">
-        <div>
-          <h2>Быстрые действия</h2>
-          <p>Основные возможности личного кабинета</p>
-        </div>
-      </div>
-
-      <div class="quick-actions">
-
-        <a routerLink="/student/new-appointment" class="action-card">
-          <div class="action-icon">＋</div>
-          <h3>Новая запись</h3>
-          <p>Выберите тему и удобное время приёма</p>
-          <span>Перейти →</span>
-        </a>
-
-        <a href="#all-appointments" class="action-card">
-          <div class="action-icon">▣</div>
-          <h3>Мои записи</h3>
-          <p>Просматривайте историю обращений</p>
-          <span>Перейти →</span>
-        </a>
-
-        <a href="#notifications" class="action-card">
-          <div class="action-icon">♧</div>
-          <h3>Уведомления</h3>
-          <p>Следите за изменениями ваших записей</p>
-          <span>Перейти →</span>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Уведомления -->
-    <section class="section" id="notifications">
-      <div class="section-heading">
-        <div>
-          <h2>Последние уведомления</h2>
-          <p>Важная информация о ваших обращениях</p>
-        </div>
-
-        <a href="#notifications">Все уведомления →</a>
-      </div>
-
-      <div class="notifications-list">
-
-        <article class="notification-item">
-          <div class="notification-icon">✓</div>
+        <section class="welcome-section">
           <div>
-            <strong>Запись подтверждена</strong>
-            <p>Ваша запись на приём успешно подтверждена.</p>
-            <small>Сегодня, 10:35</small>
+            <h2>Здравствуйте, {{ studentName }}!</h2>
+            <p>
+              Здесь вы можете управлять своими записями
+              и следить за уведомлениями.
+            </p>
           </div>
-        </article>
+        </section>
 
-        <article class="notification-item">
-          <div class="notification-icon">♧</div>
-          <div>
-            <strong>Напоминание о приёме</strong>
-            <p>Не забудьте посетить деканат в назначенное время.</p>
-            <small>Вчера, 16:20</small>
+
+        <section class="stats-grid">
+
+          <article class="stat-card">
+            <div>
+              <span>Всего записей</span>
+              <strong>{{ totalAppointments }}</strong>
+              <small>За всё время</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div>
+              <span>Предстоящие приёмы</span>
+              <strong>{{ upcomingAppointments.length }}</strong>
+              <small>Запланировано</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div>
+              <span>Завершённые приёмы</span>
+              <strong>{{ completedAppointments.length }}</strong>
+              <small>За всё время</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div>
+              <span>Новые уведомления</span>
+              <strong>{{ unreadNotifications }}</strong>
+              <small>Не прочитано</small>
+            </div>
+          </article>
+
+        </section>
+
+
+        <section class="content-section">
+
+          <div class="section-heading">
+            <div>
+              <h2>Ближайший приём</h2>
+              <p>Информация о вашей следующей записи</p>
+            </div>
+
+            <a routerLink="/student/new-appointment" class="text-link">
+              Новая запись
+            </a>
           </div>
-        </article>
 
-      </div>
+
+          @if (nextAppointment; as appointment) {
+            <article class="appointment-highlight">
+
+              <div class="appointment-highlight-info">
+                <span class="section-label">Следующая запись</span>
+
+                <h3>
+                  Приём у деканата
+                </h3>
+
+                @if (getPeriod(appointment.period_id); as period) {
+                  <p>
+                    {{ formatDate(period.starts_at) }}
+                  </p>
+
+                  <p>
+                    {{ formatTime(period.starts_at) }}
+                    –
+                    {{ formatTime(period.ends_at) }}
+                  </p>
+                }
+
+                <p>
+                  Номер в очереди: {{ appointment.queue_number }}
+                </p>
+
+                <span class="appointment-status">
+                  {{ getStatusLabel(appointment.status) }}
+                </span>
+              </div>
+
+            </article>
+          } @else {
+            <div class="empty-state">
+              <h3>У вас пока нет предстоящих приёмов</h3>
+              <p>
+                Вы можете выбрать удобное время и записаться на приём.
+              </p>
+
+              <a
+                routerLink="/student/new-appointment"
+                class="primary-button"
+              >
+                Записаться на приём
+              </a>
+            </div>
+          }
+
+        </section>
+
+
+        <section class="content-section" id="appointments">
+
+          <div class="section-heading">
+            <div>
+              <h2>Мои записи</h2>
+              <p>История ваших обращений</p>
+            </div>
+          </div>
+
+
+          @if (appointments.length > 0) {
+            <div class="appointments-list">
+
+              @for (
+                appointment of appointments;
+                track trackById($index, appointment)
+              ) {
+                <article class="appointment-card">
+
+                  <div class="appointment-card-main">
+                    <h3>Запись на приём</h3>
+
+                    @if (getPeriod(appointment.period_id); as period) {
+                      <p>
+                        {{ formatDate(period.starts_at) }}
+                      </p>
+
+                      <p>
+                        Время:
+                        {{ formatTime(period.starts_at) }}
+                        –
+                        {{ formatTime(period.ends_at) }}
+                      </p>
+                    } @else {
+                      <p>Информация о времени пока недоступна</p>
+                    }
+
+                    <p>
+                      Номер в очереди: {{ appointment.queue_number }}
+                    </p>
+                  </div>
+
+                  <div class="appointment-card-status">
+                    {{ getStatusLabel(appointment.status) }}
+                  </div>
+
+                </article>
+              }
+
+            </div>
+          } @else {
+            <div class="empty-state">
+              <p>У вас пока нет записей.</p>
+            </div>
+          }
+
+        </section>
+
+
+        <section class="content-section" id="notifications">
+
+          <div class="section-heading">
+            <div>
+              <h2>Уведомления</h2>
+              <p>Последние сообщения и обновления</p>
+            </div>
+          </div>
+
+
+          @if (notifications.length > 0) {
+            <div class="notifications-list">
+
+              @for (
+                notification of notifications;
+                track trackById($index, notification)
+              ) {
+                <article class="notification-card">
+
+                  <div class="notification-card-content">
+                    <p>{{ notification.message }}</p>
+
+                    @if (notification.created_at) {
+                      <small>
+                        {{ formatDate(notification.created_at) }}
+                        {{ formatTime(notification.created_at) }}
+                      </small>
+                    }
+                  </div>
+
+                  @if (notification.read_at === null) {
+                    <span class="notification-status">
+                      Новое
+                    </span>
+                  }
+
+                </article>
+              }
+
+            </div>
+          } @else {
+            <div class="empty-state">
+              <p>У вас пока нет уведомлений.</p>
+            </div>
+          }
+
+        </section>
+
+
+        <section class="content-section" id="profile">
+
+          <div class="section-heading">
+            <div>
+              <h2>Мой профиль</h2>
+              <p>Информация о вашей учётной записи</p>
+            </div>
+          </div>
+
+
+          <div class="profile-card">
+
+            <div class="profile-avatar">
+              {{ initials }}
+            </div>
+
+            <div class="profile-info">
+              <div class="profile-field">
+                <span>ФИО</span>
+                <strong>{{ studentName }}</strong>
+              </div>
+
+              <div class="profile-field">
+                <span>Электронная почта</span>
+                <strong>{{ user?.email || 'Не указана' }}</strong>
+              </div>
+
+              <div class="profile-field">
+                <span>Роль</span>
+                <strong>Студент</strong>
+              </div>
+
+              <div class="profile-field">
+                <span>Статус аккаунта</span>
+                <strong>
+                  {{ user?.is_active ? 'Активен' : 'Неактивен' }}
+                </strong>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="content-section">
+
+          <div class="section-heading">
+            <div>
+              <h2>Быстрые действия</h2>
+              <p>Что вы хотите сделать?</p>
+            </div>
+          </div>
+
+          <div class="actions-grid">
+
+            <a
+              routerLink="/student/new-appointment"
+              class="action-card"
+            >
+              <h3>Новая запись</h3>
+              <p>
+                Выберите тему и удобное время приёма.
+              </p>
+              <span>Перейти</span>
+            </a>
+
+            <a href="#appointments" class="action-card">
+              <h3>Мои записи</h3>
+              <p>
+                Посмотрите информацию о ваших обращениях.
+              </p>
+              <span>Перейти</span>
+            </a>
+
+            <a href="#notifications" class="action-card">
+              <h3>Уведомления</h3>
+              <p>
+                Ознакомьтесь с последними сообщениями.
+              </p>
+              <span>Перейти</span>
+            </a>
+
+          </div>
+
+        </section>
+
+      }
+
     </section>
 
-    <!-- Подвал -->
-    <footer class="footer">
-      <span>© ДГТУ — Система электронной записи</span>
-      <span>Личный кабинет студента</span>
+
+    <footer class="dashboard-footer">
+      <p>Личный кабинет студента</p>
     </footer>
 
   </main>
+
 </div>

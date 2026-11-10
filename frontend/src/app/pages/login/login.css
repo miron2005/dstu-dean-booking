@@ -184,4 +184,23 @@
   .auth-card h1 {
     font-size: 27px;
   }
+  
+.form-error {
+  margin: 0 0 15px;
+  padding: 12px;
+  background: #fff0f0;
+  border-left: 3px solid #c74747;
+  color: #b52e2e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-button:disabled:hover {
+  background: #292d32;
+}
 }
