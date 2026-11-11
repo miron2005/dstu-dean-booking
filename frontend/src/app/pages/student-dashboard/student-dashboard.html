@@ -11,7 +11,11 @@
         Главная
       </a>
 
-      <a href="#appointments" class="nav-item">
+      <a
+        href="#appointments"
+        class="nav-item"
+        (click)="$event.preventDefault(); scrollToAppointments()"
+      >
         Мои записи
       </a>
 
@@ -27,7 +31,11 @@
         Уведомления
       </a>
 
-      <a href="#profile" class="nav-item">
+      <a
+        href="#profile"
+        class="nav-item"
+        (click)="$event.preventDefault(); scrollToProfile()"
+      >
         Мой профиль
       </a>
     </nav>
@@ -374,7 +382,11 @@
               <span>Перейти</span>
             </a>
 
-            <a href="#appointments" class="action-card">
+            <a
+              href="#appointments"
+              class="action-card"
+              (click)="$event.preventDefault(); scrollToAppointments()"
+            >
               <h3>Мои записи</h3>
               <p>
                 Посмотрите информацию о ваших обращениях.
