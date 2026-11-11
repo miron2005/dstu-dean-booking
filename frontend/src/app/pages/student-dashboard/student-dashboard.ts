@@ -28,6 +28,9 @@ export class StudentDashboard implements OnInit {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  // Ключ для хранения прочитанных уведомлений в браузере
+  private readonly readNotificationsKey = 'read_student_notifications';
+
   user: User | null = null;
   appointments: StudentAppointment[] = [];
   notifications: StudentNotification[] = [];
@@ -90,7 +93,19 @@ export class StudentDashboard implements OnInit {
     // Загружаем уведомления
     this.api.getNotifications().subscribe({
       next: (notifications) => {
-        this.notifications = notifications;
+        const readIds = this.getReadNotificationIds();
+
+        this.notifications = notifications.map((notification) => {
+          if (readIds.includes(notification.id)) {
+            return {
+              ...notification,
+              read_at: notification.read_at || new Date().toISOString(),
+            };
+          }
+
+          return notification;
+        });
+
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -109,6 +124,88 @@ export class StudentDashboard implements OnInit {
       error: (error) => {
         console.error('Ошибка загрузки периодов:', error);
       },
+    });
+  }
+
+  // Получаем список ID прочитанных уведомлений
+  private getReadNotificationIds(): number[] {
+    const saved = localStorage.getItem(this.readNotificationsKey);
+
+    if (!saved) {
+      return [];
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(saved);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.filter(
+        (id): id is number => typeof id === 'number',
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  // Сохраняем прочитанное уведомление
+  private saveReadNotificationIds(ids: number[]): void {
+    localStorage.setItem(
+      this.readNotificationsKey,
+      JSON.stringify(ids),
+    );
+  }
+
+  // Отмечаем одно уведомление как прочитанное
+  markNotificationAsRead(notification: StudentNotification): void {
+    if (notification.read_at !== null) {
+      return;
+    }
+
+    const readIds = this.getReadNotificationIds();
+
+    if (!readIds.includes(notification.id)) {
+      readIds.push(notification.id);
+      this.saveReadNotificationIds(readIds);
+    }
+
+    notification.read_at = new Date().toISOString();
+
+    this.cdr.detectChanges();
+  }
+
+  // Отмечаем все уведомления как прочитанные
+  markAllNotificationsAsRead(): void {
+    const readIds = this.getReadNotificationIds();
+
+    this.notifications.forEach((notification) => {
+      if (notification.read_at === null) {
+        notification.read_at = new Date().toISOString();
+      }
+
+      if (!readIds.includes(notification.id)) {
+        readIds.push(notification.id);
+      }
+    });
+
+    this.saveReadNotificationIds(readIds);
+
+    this.cdr.detectChanges();
+  }
+
+  // Открываем уведомления через кнопку сверху
+  openNotifications(): void {
+    this.markAllNotificationsAsRead();
+    this.scrollToNotifications();
+  }
+
+  // Плавная прокрутка к уведомлениям
+  scrollToNotifications(): void {
+    document.getElementById('notifications')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
     });
   }
 
