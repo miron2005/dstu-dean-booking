@@ -146,7 +146,8 @@ export class DeanDashboard implements OnInit {
           return;
         }
 
-        this.errorMessage = 'Не удалось загрузить очередь.';
+        this.errorMessage =
+          error.error?.detail || 'Не удалось загрузить очередь.';
       },
     });
   }
@@ -260,6 +261,16 @@ export class DeanDashboard implements OnInit {
     };
 
     return labels[status] ?? status;
+  }
+
+  // Идентификация приёмных периодов в списке
+  trackByPeriodId(index: number, period: ReceptionPeriod): number {
+    return period.id;
+  }
+
+  // Идентификация записей студентов в очереди
+  trackByQueueId(index: number, appointment: QueueItem): number {
+    return appointment.id;
   }
 
   logout(): void {

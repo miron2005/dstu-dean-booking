@@ -5,8 +5,8 @@ import {
   inject,
   ChangeDetectorRef,
 } from '@angular/core';
+
 import { RouterLink, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 
 import {
   ApiService,
@@ -36,39 +36,30 @@ export class StudentDashboard implements OnInit {
   loading = true;
   errorMessage = '';
 
-  activeSection = 'home';
-
   ngOnInit(): void {
+    console.log('1. StudentDashboard запущен');
+
     if (!this.api.getToken()) {
       this.router.navigate(['/login']);
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    // Загружаем данные пользователя
+    this.api.getMe().subscribe({
+      next: (user) => {
+        console.log('2. Получены данные пользователя:', user);
 
-    forkJoin({
-      user: this.api.getMe(),
-      appointments: this.api.getMyAppointments(),
-      notifications: this.api.getNotifications(),
-      periods: this.api.getPeriods(),
-    }).subscribe({
-      next: (data) => {
-        this.user = data.user;
-        this.appointments = data.appointments;
-        this.notifications = data.notifications;
-        this.periods = data.periods;
-
+        this.user = user;
         this.loading = false;
-
-        console.log('Данные личного кабинета загружены:', data);
-
         this.cdr.detectChanges();
+
+        console.log('3. Значение loading:', this.loading);
       },
       error: (error) => {
-        console.error('Ошибка загрузки личного кабинета:', error);
+        console.error('Ошибка загрузки пользователя:', error);
 
         this.loading = false;
+        this.cdr.detectChanges();
 
         if (error.status === 401) {
           this.api.logout();
@@ -76,26 +67,58 @@ export class StudentDashboard implements OnInit {
           return;
         }
 
-        this.errorMessage =
-          'Не удалось загрузить данные личного кабинета. Попробуйте обновить страницу.';
-
+        this.errorMessage = 'Не удалось загрузить данные пользователя.';
         this.cdr.detectChanges();
+      },
+    });
+
+    // Загружаем записи студента
+    this.api.getMyAppointments().subscribe({
+      next: (appointments) => {
+        console.log('Записи студента получены:', appointments);
+
+        this.appointments = appointments;
+        this.cdr.detectChanges();
+
+        console.log('Количество записей:', this.appointments.length);
+      },
+      error: (error) => {
+        console.error('Ошибка загрузки записей:', error);
+      },
+    });
+
+    // Загружаем уведомления
+    this.api.getNotifications().subscribe({
+      next: (notifications) => {
+        this.notifications = notifications;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Ошибка загрузки уведомлений:', error);
+      },
+    });
+
+    // Загружаем периоды приёма
+    this.api.getPeriods().subscribe({
+      next: (periods) => {
+        console.log('Периоды приёма получены:', periods);
+
+        this.periods = periods;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Ошибка загрузки периодов:', error);
       },
     });
   }
 
-  // Переход к нужному разделу кабинета
-  scrollToSection(sectionId: string): void {
-    this.activeSection = sectionId;
+  logout(): void {
+    this.api.logout();
+    this.router.navigate(['/login']);
+  }
 
-    setTimeout(() => {
-      const section = document.getElementById(sectionId);
-
-      section?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 0);
+  trackById(_index: number, item: { id: number }): number {
+    return item.id;
   }
 
   get totalAppointments(): number {
@@ -143,9 +166,7 @@ export class StudentDashboard implements OnInit {
   }
 
   getPeriod(periodId: number): ReceptionPeriod | undefined {
-    return this.periods.find(
-      (period) => Number(period.id) === Number(periodId),
-    );
+    return this.periods.find((period) => period.id === periodId);
   }
 
   get studentName(): string {
@@ -191,24 +212,17 @@ export class StudentDashboard implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
+      active: 'Ожидает приёма',
+      called: 'Вызван',
       pending: 'Ожидает подтверждения',
       confirmed: 'Подтверждена',
       accepted: 'Приём состоялся',
       completed: 'Завершена',
       cancelled: 'Отменена',
       canceled: 'Отменена',
-      no_show: 'Неявка',
+      no_show: 'Не явился',
     };
 
     return labels[status] ?? status;
-  }
-
-  trackById(_index: number, item: { id: number }): number {
-    return item.id;
-  }
-
-  logout(): void {
-    this.api.logout();
-    this.router.navigate(['/login']);
   }
 }
