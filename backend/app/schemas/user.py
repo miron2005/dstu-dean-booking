@@ -39,6 +39,13 @@ class SUser(SUserBase):
     model_config = {"from_attributes": True}
 
 
+class SDean(BaseModel):
+    id: int
+    full_name: str
+
+    model_config = {"from_attributes": True}
+
+
 class SToken(BaseModel):
     access_token: str
     token_type: str = "bearer"
