@@ -10,6 +10,13 @@ class UserRepository:
         return session.scalars(select(User).order_by(User.id)).all()
 
     @classmethod
+    def get_deans(cls, faculty_id: int | None, session: Session):
+        query = select(User).where(User.role == "dean", User.is_active.is_(True)).order_by(User.full_name)
+        if faculty_id is not None:
+            query = query.where(User.faculty_id == faculty_id)
+        return session.scalars(query).all()
+
+    @classmethod
     def get_one(cls, user_id: int, session: Session):
         return session.get(User, user_id)
 

@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import Appointment, ReceptionPeriod
 
@@ -12,6 +12,7 @@ class PeriodRepository:
         query = (
             select(ReceptionPeriod)
             .where(ReceptionPeriod.faculty_id == faculty_id)
+            .options(selectinload(ReceptionPeriod.dean))
             .order_by(ReceptionPeriod.starts_at)
         )
         if day is not None:

@@ -22,5 +22,6 @@ class SPeriodPatch(BaseModel):
 class SPeriod(SPeriodBase):
     id: int
     faculty_id: int
+    dean_name: str
     free_places: int
     status: str

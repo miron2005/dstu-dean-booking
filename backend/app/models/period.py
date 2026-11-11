@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Model
 
@@ -22,3 +22,5 @@ class ReceptionPeriod(Model):
     capacity: Mapped[int] = mapped_column(Integer)
     next_queue_number: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(16), default="open")
+
+    dean = relationship("User")
