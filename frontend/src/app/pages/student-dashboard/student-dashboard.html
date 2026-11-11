@@ -19,7 +19,11 @@
         Записаться на приём
       </a>
 
-      <a href="#notifications" class="nav-item">
+      <a
+        href="#notifications"
+        class="nav-item"
+        (click)="$event.preventDefault(); scrollToNotifications()"
+      >
         Уведомления
       </a>
 
@@ -39,7 +43,6 @@
     </div>
   </aside>
 
-
   <main class="main-content">
 
     <header class="topbar">
@@ -48,7 +51,11 @@
       </div>
 
       <div class="topbar-right">
-        <a href="#notifications" class="notification-button">
+        <a
+          href="#notifications"
+          class="notification-button"
+          (click)="$event.preventDefault(); openNotifications()"
+        >
           Уведомления
 
           @if (unreadNotifications > 0) {
@@ -70,7 +77,6 @@
         </div>
       </div>
     </header>
-
 
     <section class="dashboard-content">
 
@@ -97,7 +103,6 @@
             </p>
           </div>
         </section>
-
 
         <section class="stats-grid">
 
@@ -135,7 +140,6 @@
 
         </section>
 
-
         <section class="content-section">
 
           <div class="section-heading">
@@ -149,16 +153,13 @@
             </a>
           </div>
 
-
           @if (nextAppointment; as appointment) {
             <article class="appointment-highlight">
 
               <div class="appointment-highlight-info">
                 <span class="section-label">Следующая запись</span>
 
-                <h3>
-                  Приём у деканата
-                </h3>
+                <h3>Приём у деканата</h3>
 
                 @if (getPeriod(appointment.period_id); as period) {
                   <p>
@@ -200,7 +201,6 @@
 
         </section>
 
-
         <section class="content-section" id="appointments">
 
           <div class="section-heading">
@@ -209,7 +209,6 @@
               <p>История ваших обращений</p>
             </div>
           </div>
-
 
           @if (appointments.length > 0) {
             <div class="appointments-list">
@@ -259,7 +258,6 @@
 
         </section>
 
-
         <section class="content-section" id="notifications">
 
           <div class="section-heading">
@@ -269,7 +267,6 @@
             </div>
           </div>
 
-
           @if (notifications.length > 0) {
             <div class="notifications-list">
 
@@ -277,7 +274,11 @@
                 notification of notifications;
                 track trackById($index, notification)
               ) {
-                <article class="notification-card">
+                <article
+                  class="notification-card"
+                  [class.notification-read]="notification.read_at !== null"
+                  (click)="markNotificationAsRead(notification)"
+                >
 
                   <div class="notification-card-content">
                     <p>{{ notification.message }}</p>
@@ -308,7 +309,6 @@
 
         </section>
 
-
         <section class="content-section" id="profile">
 
           <div class="section-heading">
@@ -317,7 +317,6 @@
               <p>Информация о вашей учётной записи</p>
             </div>
           </div>
-
 
           <div class="profile-card">
 
@@ -353,7 +352,6 @@
 
         </section>
 
-
         <section class="content-section">
 
           <div class="section-heading">
@@ -384,7 +382,11 @@
               <span>Перейти</span>
             </a>
 
-            <a href="#notifications" class="action-card">
+            <a
+              href="#notifications"
+              class="action-card"
+              (click)="$event.preventDefault(); scrollToNotifications()"
+            >
               <h3>Уведомления</h3>
               <p>
                 Ознакомьтесь с последними сообщениями.
@@ -399,7 +401,6 @@
       }
 
     </section>
-
 
     <footer class="dashboard-footer">
       <p>Личный кабинет студента</p>
