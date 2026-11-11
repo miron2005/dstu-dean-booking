@@ -28,7 +28,6 @@ export class StudentDashboard implements OnInit {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  // Ключ для хранения прочитанных уведомлений в браузере
   private readonly readNotificationsKey = 'read_student_notifications';
 
   user: User | null = null;
@@ -150,7 +149,7 @@ export class StudentDashboard implements OnInit {
     }
   }
 
-  // Сохраняем прочитанное уведомление
+  // Сохраняем прочитанные уведомления
   private saveReadNotificationIds(ids: number[]): void {
     localStorage.setItem(
       this.readNotificationsKey,
@@ -204,6 +203,22 @@ export class StudentDashboard implements OnInit {
   // Плавная прокрутка к уведомлениям
   scrollToNotifications(): void {
     document.getElementById('notifications')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  // Плавная прокрутка к профилю
+  scrollToProfile(): void {
+    document.getElementById('profile')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  // Плавная прокрутка к записям
+  scrollToAppointments(): void {
+    document.getElementById('appointments')?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
