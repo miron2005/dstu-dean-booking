@@ -10,6 +10,7 @@ def to_out(session, period):
         id=period.id,
         faculty_id=period.faculty_id,
         dean_id=period.dean_id,
+        dean_name=period.dean.full_name,
         starts_at=period.starts_at,
         ends_at=period.ends_at,
         capacity=period.capacity,
