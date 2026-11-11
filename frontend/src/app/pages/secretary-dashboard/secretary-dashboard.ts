@@ -3,7 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService, ReceptionPeriod, User } from '../../core/api';
+import { ApiService, ReceptionPeriod, User, Dean } from '../../core/api';
 
 @Component({
   selector: 'app-secretary-dashboard',
@@ -15,12 +15,15 @@ import { ApiService, ReceptionPeriod, User } from '../../core/api';
 export class SecretaryDashboard implements OnInit {
   user: User | null = null;
   periods: ReceptionPeriod[] = [];
+  deans: Dean[] = [];
 
   loading = false;
+  loadingDeans = false;
   saving = false;
 
   errorMessage = '';
   successMessage = '';
+  deansErrorMessage = '';
 
   editingId: number | null = null;
 
@@ -53,7 +56,8 @@ export class SecretaryDashboard implements OnInit {
         this.user = user;
         this.cdr.detectChanges();
 
-        // Автоматически загружаем периоды после входа в кабинет
+        // Загружаем список деканов и периоды приёма
+        this.loadDeans();
         this.loadPeriods();
       },
       error: () => {
@@ -80,6 +84,41 @@ export class SecretaryDashboard implements OnInit {
       (sum, period) => sum + Number(period.free_places || 0),
       0,
     );
+  }
+
+  // Загрузка списка деканов факультета
+  loadDeans(): void {
+    this.loadingDeans = true;
+    this.deansErrorMessage = '';
+    this.cdr.detectChanges();
+
+    this.api.getDeans().subscribe({
+      next: (deans) => {
+        this.deans = deans;
+        this.loadingDeans = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.deansErrorMessage =
+          error.error?.detail || 'Не удалось загрузить список деканов';
+
+        this.loadingDeans = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // Получение ФИО декана для карточки периода
+  getDeanName(period: ReceptionPeriod): string {
+    if (period.dean_name) {
+      return period.dean_name;
+    }
+
+    const dean = this.deans.find(
+      (item) => item.id === period.dean_id,
+    );
+
+    return dean?.full_name || 'Неизвестный декан';
   }
 
   // Загрузка периодов
@@ -177,6 +216,22 @@ export class SecretaryDashboard implements OnInit {
   // Заполнение формы данными выбранного периода
   editPeriod(period: ReceptionPeriod): void {
     this.editingId = period.id;
+
+    // Если декана уже нет среди активных, но его ФИО
+    // присутствует в периоде, добавляем его для отображения
+    const existingDean = this.deans.find(
+      (dean) => dean.id === period.dean_id,
+    );
+
+    if (!existingDean && period.dean_name) {
+      this.deans = [
+        ...this.deans,
+        {
+          id: period.dean_id,
+          full_name: period.dean_name,
+        },
+      ];
+    }
 
     this.form = {
       dean_id: period.dean_id,
