@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import Appointment
 
@@ -32,6 +32,7 @@ class AppointmentRepository:
         query = (
             select(Appointment)
             .where(Appointment.period_id == period_id, Appointment.status != "cancelled")
+            .options(selectinload(Appointment.student))
             .order_by(Appointment.queue_number)
         )
         return session.scalars(query).all()
