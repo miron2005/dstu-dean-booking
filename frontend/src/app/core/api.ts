@@ -31,6 +31,13 @@ export interface User {
   is_active: boolean;
 }
 
+// Деканы
+
+export interface Dean {
+  id: number;
+  full_name: string;
+}
+
 export interface RegisterData {
   full_name: string;
   email: string;
@@ -68,6 +75,7 @@ export interface ReceptionPeriod {
   id: number;
   faculty_id: number;
   dean_id: number;
+  dean_name?: string;
   starts_at: string;
   ends_at: string;
   capacity: number;
@@ -239,6 +247,15 @@ export class ApiService {
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(
       `${this.baseUrl}/users`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  // Получение списка активных деканов факультета
+
+  getDeans(): Observable<Dean[]> {
+    return this.http.get<Dean[]>(
+      `${this.baseUrl}/deans`,
       { headers: this.getAuthHeaders() },
     );
   }
