@@ -1,5 +1,5 @@
 
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -19,6 +19,7 @@ import {
 })
 export class DeanDashboard implements OnInit {
   private api = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   userLoading = true;
@@ -67,6 +68,7 @@ export class DeanDashboard implements OnInit {
       next: (user) => {
         this.user = user;
         this.userLoading = false;
+        this.cdr.detectChanges();
 
         if (user.role !== 'dean') {
           this.api.logout();
@@ -87,6 +89,7 @@ export class DeanDashboard implements OnInit {
 
         this.errorMessage =
           'Не удалось загрузить профиль пользователя. Попробуйте обновить страницу.';
+        this.cdr.detectChanges();
       },
     });
 
@@ -99,6 +102,8 @@ export class DeanDashboard implements OnInit {
         if (periods.length > 0) {
           this.selectPeriod(periods[0]);
         }
+
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.loading = false;
@@ -113,6 +118,7 @@ export class DeanDashboard implements OnInit {
 
         this.errorMessage =
           'Не удалось загрузить приёмные периоды. Проверьте подключение к серверу.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -133,6 +139,7 @@ export class DeanDashboard implements OnInit {
       next: (queue) => {
         this.queue = queue;
         this.queueLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.queue = [];
@@ -148,6 +155,7 @@ export class DeanDashboard implements OnInit {
 
         this.errorMessage =
           error.error?.detail || 'Не удалось загрузить очередь.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -170,6 +178,7 @@ export class DeanDashboard implements OnInit {
           `Вызван студент: ${appointment.student_name}`;
 
         this.loadQueue(periodId);
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.actionLoading = false;
@@ -179,6 +188,7 @@ export class DeanDashboard implements OnInit {
         this.errorMessage =
           error.error?.detail ||
           'Не удалось вызвать следующего студента.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -222,6 +232,8 @@ export class DeanDashboard implements OnInit {
         if (this.selectedPeriod) {
           this.loadQueue(this.selectedPeriod.id);
         }
+
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.actionLoading = false;
@@ -231,6 +243,7 @@ export class DeanDashboard implements OnInit {
         this.errorMessage =
           error.error?.detail ||
           'Не удалось сохранить результат.';
+        this.cdr.detectChanges();
       },
     });
   }
