@@ -19,7 +19,8 @@ def get_periods(
     day: Annotated[date | None, Query(alias="date")] = None,
     only_available: bool = False,
 ):
-    periods = PeriodRepository.get_all(user.faculty_id, session, day)
+    dean_id = user.id if user.role == "dean" else None
+    periods = PeriodRepository.get_all(user.faculty_id, session, day, dean_id)
     result = [service.to_out(session, period) for period in periods]
     if only_available:
         now = datetime.now(timezone.utc)
