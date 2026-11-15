@@ -214,15 +214,15 @@
           <div class="section-heading">
             <div>
               <h2>Мои записи</h2>
-              <p>История ваших обращений</p>
+              <p>Ваши актуальные записи</p>
             </div>
           </div>
 
-          @if (appointments.length > 0) {
+          @if (visibleAppointments.length > 0) {
             <div class="appointments-list">
 
               @for (
-                appointment of appointments;
+                appointment of visibleAppointments;
                 track trackById($index, appointment)
               ) {
                 <article class="appointment-card">
@@ -260,7 +260,7 @@
             </div>
           } @else {
             <div class="empty-state">
-              <p>У вас пока нет записей.</p>
+              <p>У вас пока нет актуальных записей.</p>
             </div>
           }
 

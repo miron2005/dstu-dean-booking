@@ -61,7 +61,7 @@ export class NewAppointment implements OnInit {
     });
   }
 
-  // Загрузка окон приёма
+  // Загрузка актуальных окон приёма
   loadPeriods(facultyId: number): void {
     this.loading = true;
 
@@ -70,11 +70,22 @@ export class NewAppointment implements OnInit {
         console.log('Полученные окна от сервера:', periods);
         console.log('Факультет студента:', facultyId);
 
+        // Получаем текущее время
+        const currentTime = Date.now();
+
         this.periods = periods
           .filter((period) =>
+            // Проверяем факультет студента
             Number(period.faculty_id) === Number(facultyId) &&
+
+            // Проверяем, открыт ли приём
             period.status === 'open' &&
-            Number(period.free_places) > 0
+
+            // Проверяем наличие свободных мест
+            Number(period.free_places) > 0 &&
+
+            // Скрываем окна, время окончания которых уже прошло
+            new Date(period.ends_at).getTime() > currentTime
           )
           .sort(
             (a, b) =>
@@ -82,7 +93,7 @@ export class NewAppointment implements OnInit {
               new Date(b.starts_at).getTime()
           );
 
-        console.log('Окна, доступные студенту:', this.periods);
+        console.log('Актуальные окна, доступные студенту:', this.periods);
 
         this.loading = false;
         this.cdr.detectChanges();
@@ -134,6 +145,18 @@ export class NewAppointment implements OnInit {
     this.successMessage = '';
 
     if (this.savingPeriodId !== null) {
+      return;
+    }
+
+    // Дополнительная проверка: нельзя записаться на уже прошедший приём
+    if (new Date(period.ends_at).getTime() <= Date.now()) {
+      this.errorMessage = 'Время этого приёма уже прошло. Выберите другое окно.';
+
+      if (this.user?.faculty_id != null) {
+        this.loadPeriods(this.user.faculty_id);
+      }
+
+      this.cdr.detectChanges();
       return;
     }
 

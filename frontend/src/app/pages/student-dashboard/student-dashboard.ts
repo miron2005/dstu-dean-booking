@@ -237,6 +237,23 @@ export class StudentDashboard implements OnInit {
     return this.appointments.length;
   }
 
+  // Показываем только записи, приём по которым ещё не закончился
+  get visibleAppointments(): StudentAppointment[] {
+    const currentTime = Date.now();
+
+    return this.appointments.filter((appointment) => {
+      const period = this.getPeriod(appointment.period_id);
+
+      if (!period) {
+        return false;
+      }
+
+      const endTime = new Date(period.ends_at).getTime();
+
+      return Number.isFinite(endTime) && endTime > currentTime;
+    });
+  }
+
   get upcomingAppointments(): StudentAppointment[] {
     return this.appointments.filter((appointment) => {
       const period = this.getPeriod(appointment.period_id);
