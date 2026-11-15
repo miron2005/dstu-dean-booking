@@ -67,20 +67,42 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  get activePeriodsCount(): number {
-    return this.periods.filter(
-      (period) => period.status === 'open',
-    ).length;
+  // Только актуальные периоды приёма
+  get visiblePeriods(): ReceptionPeriod[] {
+    const currentTime = Date.now();
+
+    return this.periods.filter((period) => {
+      const endTime = new Date(period.ends_at).getTime();
+
+      return Number.isFinite(endTime) && endTime > currentTime;
+    });
   }
 
+  // Количество активных и ещё не завершившихся периодов
+  get activePeriodsCount(): number {
+    const currentTime = Date.now();
+
+    return this.periods.filter((period) => {
+      const endTime = new Date(period.ends_at).getTime();
+
+      return (
+        period.status === 'open' &&
+        Number.isFinite(endTime) &&
+        endTime > currentTime
+      );
+    }).length;
+  }
+
+  // Количество отменённых периодов
   get cancelledPeriodsCount(): number {
     return this.periods.filter(
       (period) => period.status === 'cancelled',
     ).length;
   }
 
+  // Количество свободных мест в актуальных периодах
   get freePlacesCount(): number {
-    return this.periods.reduce(
+    return this.visiblePeriods.reduce(
       (sum, period) => sum + Number(period.free_places || 0),
       0,
     );
