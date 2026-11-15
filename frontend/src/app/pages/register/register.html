@@ -24,34 +24,71 @@
         чтобы записываться на приём в деканат.
       </p>
 
-      <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <form
+        (ngSubmit)="onSubmit()"
+        #registerForm="ngForm"
+        novalidate
+      >
 
+        <!-- ФИО -->
         <div class="form-group">
           <label for="full_name">ФИО</label>
+
           <input
             type="text"
             id="full_name"
             name="fullName"
             [(ngModel)]="fullName"
+            #fullNameModel="ngModel"
             placeholder="Иванов Иван Иванович"
             autocomplete="name"
+            maxlength="200"
             required
+            [class.invalid-input]="(submitted || fullNameModel.touched) &&
+              (!fullName.trim() || isFullNameInvalid || fullName.trim().length > 200)"
           >
+
+          @if ((submitted || fullNameModel.touched) && !fullName.trim()) {
+            <span class="field-error">Введите ФИО.</span>
+          } @else if ((submitted || fullNameModel.touched) &&
+            (isFullNameInvalid || fullName.trim().length > 200)) {
+            <span class="field-error">
+              Введите корректное ФИО: минимум имя и фамилию.
+            </span>
+          }
         </div>
 
+        <!-- Электронная почта -->
         <div class="form-group">
           <label for="email">Электронная почта</label>
+
           <input
             type="email"
             id="email"
             name="email"
             [(ngModel)]="email"
+            #emailModel="ngModel"
             placeholder="example@mail.ru"
             autocomplete="email"
+            maxlength="255"
             required
+            [class.invalid-input]="(submitted || emailModel.touched) &&
+              (!email.trim() || isEmailInvalid || emailServerError)"
+            (ngModelChange)="emailServerError = ''"
           >
+
+          @if ((submitted || emailModel.touched) && !email.trim()) {
+            <span class="field-error">Введите электронную почту.</span>
+          } @else if ((submitted || emailModel.touched) && isEmailInvalid) {
+            <span class="field-error">
+              Введите корректный адрес электронной почты.
+            </span>
+          } @else if (emailServerError) {
+            <span class="field-error">{{ emailServerError }}</span>
+          }
         </div>
 
+        <!-- Факультет -->
         <div class="form-group">
           <label for="faculty">Факультет</label>
 
@@ -59,7 +96,9 @@
             id="faculty"
             name="facultyId"
             [(ngModel)]="facultyId"
+            #facultyModel="ngModel"
             required
+            [class.invalid-input]="submitted && !facultyId"
           >
             <option [ngValue]="null" disabled>
               {{ loadingFaculties ? 'Загрузка факультетов...' : 'Выберите факультет' }}
@@ -71,47 +110,72 @@
               </option>
             }
           </select>
+
+          @if (submitted && !facultyId) {
+            <span class="field-error">Выберите факультет.</span>
+          }
         </div>
 
+        <!-- Пароль -->
         <div class="form-group">
           <label for="password">Пароль</label>
+
           <input
             type="password"
             id="password"
             name="password"
             [(ngModel)]="password"
+            #passwordModel="ngModel"
             placeholder="Придумайте пароль"
             autocomplete="new-password"
             required
             minlength="8"
+            [class.invalid-input]="(submitted || passwordModel.touched) &&
+              password.length < 8"
           >
+
+          @if ((submitted || passwordModel.touched) && !password) {
+            <span class="field-error">Придумайте пароль.</span>
+          } @else if ((submitted || passwordModel.touched) && password.length < 8) {
+            <span class="field-error">
+              Пароль должен содержать минимум 8 символов.
+            </span>
+          }
         </div>
 
+        <!-- Повтор пароля -->
         <div class="form-group">
           <label for="confirm_password">Повторите пароль</label>
+
           <input
             type="password"
             id="confirm_password"
             name="confirmPassword"
             [(ngModel)]="confirmPassword"
+            #confirmPasswordModel="ngModel"
             placeholder="Повторите пароль"
             autocomplete="new-password"
             required
+            [class.invalid-input]="(submitted || confirmPasswordModel.touched) &&
+              (!confirmPassword || passwordsDoNotMatch)"
           >
+
+          @if ((submitted || confirmPasswordModel.touched) && !confirmPassword) {
+            <span class="field-error">Повторите пароль.</span>
+          } @else if ((submitted || confirmPasswordModel.touched) &&
+            passwordsDoNotMatch) {
+            <span class="field-error">Пароли не совпадают.</span>
+          }
         </div>
 
         @if (errorMessage) {
           <p class="form-error">{{ errorMessage }}</p>
         }
 
-        @if (successMessage) {
-          <p class="form-success">{{ successMessage }}</p>
-        }
-
         <button
           type="submit"
           class="submit-button"
-          [disabled]="loading || loadingFaculties || !registerForm.valid"
+          [disabled]="loading || loadingFaculties"
         >
           {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
         </button>
@@ -128,4 +192,3 @@
     Донской государственный технический университет
   </footer>
 </div>
-

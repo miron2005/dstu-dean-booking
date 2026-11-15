@@ -114,7 +114,7 @@
   color: #292d32;
   font: inherit;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus,
@@ -128,6 +128,36 @@
 
 .form-group select {
   cursor: pointer;
+}
+
+/* Ошибки валидации */
+
+.form-group input.invalid-input,
+.form-group select.invalid-input {
+  border-color: #d9534f;
+}
+
+.form-group input.invalid-input:focus,
+.form-group select.invalid-input:focus {
+  border-color: #d9534f;
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.1);
+}
+
+.field-error {
+  color: #d9534f;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: -3px;
+}
+
+.form-error {
+  padding: 12px 14px;
+  margin: 0 0 15px;
+  border-radius: 3px;
+  background: #fff0ef;
+  color: #c0392b;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .submit-button {
@@ -144,8 +174,13 @@
   transition: background 0.2s;
 }
 
-.submit-button:hover {
+.submit-button:hover:not(:disabled) {
   background: #a88b55;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .auth-switch {
