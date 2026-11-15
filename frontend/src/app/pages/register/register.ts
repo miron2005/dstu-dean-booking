@@ -27,8 +27,10 @@ export class Register implements OnInit {
 
   loading = false;
   loadingFaculties = true;
+  submitted = false;
+
   errorMessage = '';
-  successMessage = '';
+  emailServerError = '';
 
   ngOnInit(): void {
     this.api.getFaculties().subscribe({
@@ -43,22 +45,61 @@ export class Register implements OnInit {
     });
   }
 
-  onSubmit(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+  // Проверка ФИО: минимум два слова, только буквы и дефис
+  get isFullNameInvalid(): boolean {
+    const words = this.fullName.trim().split(/\s+/);
 
-    if (!this.facultyId) {
-      this.errorMessage = 'Выберите факультет.';
+    if (words.length < 2) {
+      return true;
+    }
+
+    return !words.every((word) => /^[\p{L}]+(?:-[\p{L}]+)*$/u.test(word));
+  }
+
+  // Проверка электронной почты
+  get isEmailInvalid(): boolean {
+    const value = this.email.trim();
+
+    return (
+      value.length > 255 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+    );
+  }
+
+  // Проверка совпадения паролей
+  get passwordsDoNotMatch(): boolean {
+    return (
+      this.confirmPassword.length > 0 &&
+      this.password !== this.confirmPassword
+    );
+  }
+
+  onSubmit(): void {
+    this.submitted = true;
+    this.errorMessage = '';
+    this.emailServerError = '';
+
+    if (!this.fullName.trim()) {
       return;
     }
 
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Пароли не совпадают.';
+    if (this.isFullNameInvalid || this.fullName.trim().length > 200) {
+      return;
+    }
+
+    if (!this.email.trim() || this.isEmailInvalid) {
+      return;
+    }
+
+    if (!this.facultyId) {
       return;
     }
 
     if (this.password.length < 8) {
-      this.errorMessage = 'Пароль должен содержать минимум 8 символов.';
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
       return;
     }
 
@@ -76,7 +117,6 @@ export class Register implements OnInit {
         this.password = '';
         this.confirmPassword = '';
 
-        // После успешной регистрации переходим на страницу входа
         this.router.navigate(['/login']);
       },
       error: (error: HttpErrorResponse) => {
@@ -84,10 +124,16 @@ export class Register implements OnInit {
 
         const detail = error.error?.detail;
 
-        this.errorMessage =
-          typeof detail === 'string'
-            ? detail
-            : 'Не удалось зарегистрироваться. Проверьте введённые данные.';
+        if (typeof detail === 'string') {
+          if (detail.toLowerCase().includes('почта уже занята')) {
+            this.emailServerError = 'Аккаунт с такой почтой уже существует.';
+          } else {
+            this.errorMessage = detail;
+          }
+        } else {
+          this.errorMessage =
+            'Не удалось зарегистрироваться. Проверьте введённые данные.';
+        }
       },
     });
   }
