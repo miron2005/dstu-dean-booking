@@ -72,9 +72,12 @@ export class Register implements OnInit {
     }).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = 'Регистрация прошла успешно! Теперь вы можете войти.';
+
         this.password = '';
         this.confirmPassword = '';
+
+        // После успешной регистрации переходим на страницу входа
+        this.router.navigate(['/login']);
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
