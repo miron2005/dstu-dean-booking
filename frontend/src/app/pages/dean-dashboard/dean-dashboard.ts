@@ -313,6 +313,20 @@ export class DeanDashboard implements OnInit {
     return appointment.id;
   }
 
+  scrollTo(event: Event, id: string): void {
+    event.preventDefault();
+
+    if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    document.getElementById(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   logout(): void {
     this.api.logout();
     window.location.href = '/login';

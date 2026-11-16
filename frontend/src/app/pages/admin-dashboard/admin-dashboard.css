@@ -656,3 +656,10 @@ td small {
     flex-direction: column;
   }
 }
+
+.logo-image {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  object-fit: contain;
+}

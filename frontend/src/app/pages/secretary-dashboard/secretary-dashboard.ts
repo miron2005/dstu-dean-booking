@@ -410,6 +410,20 @@ export class SecretaryDashboard implements OnInit {
     this.topicForm = { title: '', description: '' };
   }
 
+  scrollTo(event: Event, id: string): void {
+    event.preventDefault();
+
+    if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    document.getElementById(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   logout(): void {
     this.api.logout();
     this.router.navigate(['/login']);
