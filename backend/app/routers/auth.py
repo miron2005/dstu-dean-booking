@@ -6,8 +6,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.deps import SessionDep, get_current_user
 from app.models import User
 from app.repositories import FacultyRepository, UserRepository
-from app.schemas.user import SRegister, SToken, SUser
+from app.schemas.user import SMe, SMePatch, SRegister, SToken, SUser
 from app.security import create_token, hash_password, verify_password
+from app.services import profile
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -25,6 +26,7 @@ def register(data: SRegister, session: SessionDep):
             "email": data.email,
             "password_hash": hash_password(data.password),
             "faculty_id": data.faculty_id,
+            "group_name": data.group_name,
             "role": "student",
         },
         session,
@@ -39,6 +41,12 @@ def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], session: Sessio
     return SToken(access_token=create_token(user.id))
 
 
-@router.get("/me", response_model=SUser)
-def me(user: Annotated[User, Depends(get_current_user)]):
-    return user
+@router.get("/me", response_model=SMe)
+def me(user: Annotated[User, Depends(get_current_user)], session: SessionDep):
+    return profile.to_me(session, user)
+
+
+@router.patch("/me", response_model=SMe)
+def update_me(data: SMePatch, user: Annotated[User, Depends(get_current_user)], session: SessionDep):
+    changes = data.model_dump(exclude_unset=True, exclude_none=True)
+    return profile.to_me(session, UserRepository.update_one(user, changes, session))
