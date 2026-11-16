@@ -9,11 +9,12 @@ import {
   ReceptionPeriod,
   QueueItem,
 } from '../../core/api';
+import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
   selector: 'app-dean-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RoleAvatar],
   templateUrl: './dean-dashboard.html',
   styleUrl: './dean-dashboard.css',
 })

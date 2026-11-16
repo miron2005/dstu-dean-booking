@@ -15,11 +15,12 @@ import {
   StudentAppointment,
   StudentNotification,
 } from '../../core/api';
+import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RoleAvatar],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })

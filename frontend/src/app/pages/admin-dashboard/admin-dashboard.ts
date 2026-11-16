@@ -15,6 +15,7 @@ import {
   UserCreate,
   UserUpdate,
 } from '../../core/api';
+import { RoleAvatar } from '../../shared/role-avatar';
 
 type AdminTab = 'users' | 'faculties';
 type UserRole = 'student' | 'secretary' | 'dean' | 'admin';
@@ -22,7 +23,7 @@ type UserRole = 'student' | 'secretary' | 'dean' | 'admin';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RoleAvatar],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })

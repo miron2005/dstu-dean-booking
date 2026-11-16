@@ -32,7 +32,7 @@
 
       <div class="user-mini">
         <div class="avatar">
-          {{ user?.full_name?.charAt(0)?.toUpperCase() || 'Д' }}
+          <app-role-avatar role="dean" />
         </div>
         <div class="user-mini-info">
           <strong>{{ user?.full_name || 'Пользователь' }}</strong>

@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, ReceptionPeriod, User, Dean } from '../../core/api';
+import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
   selector: 'app-secretary-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RoleAvatar],
   templateUrl: './secretary-dashboard.html',
   styleUrl: './secretary-dashboard.css',
 })
