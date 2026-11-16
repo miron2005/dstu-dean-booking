@@ -45,6 +45,7 @@ export interface RegisterData {
   email: string;
   password: string;
   faculty_id?: number | null;
+  group_name: string;
 }
 
 export interface UserCreate {

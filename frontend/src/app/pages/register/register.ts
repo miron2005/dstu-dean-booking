@@ -23,6 +23,7 @@ export class Register implements OnInit {
   fullName = '';
   email = '';
   facultyId: number | null = null;
+  groupName = '';
   password = '';
   confirmPassword = '';
 
@@ -99,6 +100,10 @@ export class Register implements OnInit {
       return;
     }
 
+    if (!this.groupName.trim() || this.groupName.trim().length > 50) {
+      return;
+    }
+
     if (this.password.length < 8) {
       return;
     }
@@ -114,6 +119,7 @@ export class Register implements OnInit {
       email: this.email.trim(),
       password: this.password,
       faculty_id: this.facultyId,
+      group_name: this.groupName.trim(),
     }).subscribe({
       next: () => {
         this.loading = false;

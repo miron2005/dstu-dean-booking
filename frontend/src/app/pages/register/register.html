@@ -111,6 +111,27 @@
         </div>
 
         <div class="form-group">
+          <label for="group_name">Группа</label>
+
+          <input
+            type="text"
+            id="group_name"
+            name="groupName"
+            [(ngModel)]="groupName"
+            #groupModel="ngModel"
+            placeholder="Например, ВПР41"
+            maxlength="50"
+            required
+            [class.invalid-input]="(submitted || groupModel.touched) &&
+              !groupName.trim()"
+          >
+
+          @if ((submitted || groupModel.touched) && !groupName.trim()) {
+            <span class="field-error">Укажите вашу учебную группу.</span>
+          }
+        </div>
+
+        <div class="form-group">
           <label for="password">Пароль</label>
 
           <input
