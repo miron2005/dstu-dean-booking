@@ -163,18 +163,20 @@
             Аудитория: {{ period.room || 'не указана' }}
           </div>
 
-          <div class="period-capacity">
-            <span>Свободные окна ({{ period.slot_minutes }} мин)</span>
-            <strong>{{ period.free_places }} / {{ period.capacity }}</strong>
+          <div class="period-breakdown">
+            <span class="chip chip-free">
+              Свободно для записи: <strong>{{ period.free_places }}</strong>
+            </span>
+            <span class="chip chip-booked">
+              Занято: <strong>{{ period.booked_places }}</strong>
+            </span>
+            <span class="chip chip-past">
+              Прошло или недоступно: <strong>{{ period.past_places }}</strong>
+            </span>
           </div>
 
-          <div class="capacity-track">
-            <div
-              class="capacity-fill"
-              [style.width.%]="period.capacity > 0
-                ? (period.free_places / period.capacity) * 100
-                : 0"
-            ></div>
+          <div class="period-total">
+            Всего окон: {{ period.capacity }} по {{ period.slot_minutes }} мин
           </div>
         </button>
       </div>

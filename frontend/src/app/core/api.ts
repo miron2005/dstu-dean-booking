@@ -81,6 +81,8 @@ export interface ReceptionPeriod {
   capacity: number;
   slot_minutes: number;
   free_places: number;
+  booked_places: number;
+  past_places: number;
   status: string;
 }
 

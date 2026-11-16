@@ -723,3 +723,38 @@
   background: #b9954f;
   color: #ffffff;
 }
+
+.period-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.chip {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.chip-free {
+  background: #f3ead8;
+  color: #6b5320;
+}
+
+.chip-booked {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.chip-past {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.period-total {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6b7280;
+}
