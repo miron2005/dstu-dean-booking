@@ -23,7 +23,8 @@ export class SecretaryDashboard implements OnInit {
   periods: ReceptionPeriod[] = [];
   topics: AppealTopic[] = [];
 
-  readonly slotOptions = [10, 15, 20, 30];
+  readonly minSlotMinutes = 5;
+  readonly maxSlotMinutes = 120;
 
   scope: PeriodScope = 'upcoming';
 
@@ -43,7 +44,7 @@ export class SecretaryDashboard implements OnInit {
   form = {
     starts_at: '',
     ends_at: '',
-    slot_minutes: 15,
+    slot_minutes: 15 as number | null,
     room: '',
   };
 
@@ -104,16 +105,41 @@ export class SecretaryDashboard implements OnInit {
       .reduce((sum, period) => sum + Number(period.free_places || 0), 0);
   }
 
-  get slotsPreview(): number {
+  get slotMinutes(): number {
+    return Number(this.form.slot_minutes);
+  }
+
+  get isSlotMinutesValid(): boolean {
+    return (
+      Number.isInteger(this.slotMinutes) &&
+      this.slotMinutes >= this.minSlotMinutes &&
+      this.slotMinutes <= this.maxSlotMinutes
+    );
+  }
+
+  get totalMinutes(): number {
     const start = new Date(this.form.starts_at).getTime();
     const end = new Date(this.form.ends_at).getTime();
-    const minutes = Number(this.form.slot_minutes);
 
     if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
       return 0;
     }
 
-    return Math.floor((end - start) / (minutes * 60000));
+    return Math.floor((end - start) / 60000);
+  }
+
+  get slotsPreview(): number {
+    if (!this.isSlotMinutesValid) {
+      return 0;
+    }
+
+    return Math.floor(this.totalMinutes / this.slotMinutes);
+  }
+
+  get leftoverMinutes(): number {
+    return this.isSlotMinutesValid
+      ? this.totalMinutes - this.slotsPreview * this.slotMinutes
+      : 0;
   }
 
   setScope(scope: PeriodScope): void {
@@ -160,6 +186,12 @@ export class SecretaryDashboard implements OnInit {
       return;
     }
 
+    if (!this.isSlotMinutesValid) {
+      this.errorMessage =
+        `Длительность одного приёма: целое число минут от ${this.minSlotMinutes} до ${this.maxSlotMinutes}`;
+      return;
+    }
+
     const startsAt = new Date(this.form.starts_at);
     const endsAt = new Date(this.form.ends_at);
 
@@ -184,7 +216,7 @@ export class SecretaryDashboard implements OnInit {
     const data = {
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
-      slot_minutes: Number(this.form.slot_minutes),
+      slot_minutes: this.slotMinutes,
       room: this.form.room.trim(),
     };
 
