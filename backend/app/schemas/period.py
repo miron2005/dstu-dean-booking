@@ -26,3 +26,15 @@ class SPeriod(SPeriodBase):
     slot_minutes: int
     free_places: int
     status: str
+
+
+class SSlot(BaseModel):
+    starts_at: AwareDatetime
+    ends_at: AwareDatetime
+    is_free: bool
+    is_past: bool
+
+
+class SWeekSlot(SSlot):
+    period_id: int
+    dean_name: str

@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, Query, status
 from app.deps import SessionDep, require_role
 from app.models import User
 from app.repositories import PeriodRepository
-from app.schemas.period import SPeriod, SPeriodAdd, SPeriodPatch
+from app.schemas.period import SPeriod, SPeriodAdd, SPeriodPatch, SSlot
 from app.services import periods as service
+from app.services import slots as slots_service
 
 router = APIRouter(prefix="/periods", tags=["periods"])
 
@@ -25,6 +26,15 @@ def get_periods(
     if only_available:
         result = [p for p in result if p.status == "open" and p.free_places > 0]
     return result
+
+
+@router.get("/{period_id}/slots", response_model=list[SSlot])
+def get_period_slots(
+    period_id: int,
+    user: Annotated[User, Depends(require_role("student", "secretary", "dean", "admin"))],
+    session: SessionDep,
+):
+    return slots_service.period_slots(session, user, period_id)
 
 
 @router.post("", response_model=SPeriod, status_code=status.HTTP_201_CREATED)
