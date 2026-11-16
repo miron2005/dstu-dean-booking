@@ -8,7 +8,10 @@ from app.services import slots
 
 
 def to_out(session, period):
-    states = slots.slot_states(period, AppointmentRepository.get_taken_starts(period.id, session))
+    taken = AppointmentRepository.get_taken_starts(period.id, session)
+    states = slots.slot_states(period, taken)
+    free = sum(1 for item in states if item["is_free"])
+    booked = sum(1 for item in states if item["starts_at"] in taken)
     return SPeriod(
         id=period.id,
         faculty_id=period.faculty_id,
@@ -19,7 +22,9 @@ def to_out(session, period):
         ends_at=period.ends_at,
         capacity=len(states),
         slot_minutes=period.slot_minutes,
-        free_places=sum(1 for item in states if item["is_free"]),
+        free_places=free,
+        booked_places=booked,
+        past_places=len(states) - free - booked,
         status=period.status,
     )
 

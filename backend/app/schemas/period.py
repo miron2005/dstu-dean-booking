@@ -29,6 +29,8 @@ class SPeriod(SPeriodBase):
     capacity: int
     slot_minutes: int
     free_places: int
+    booked_places: int
+    past_places: int
     status: str
 
 
