@@ -24,7 +24,15 @@ export interface User {
   email: string;
   role: string;
   faculty_id: number | null;
+  group_name?: string | null;
+  faculty_name?: string | null;
+  dean_name?: string | null;
   is_active: boolean;
+}
+
+export interface ProfileUpdate {
+  full_name?: string;
+  group_name?: string;
 }
 
 export interface Dean {
@@ -69,9 +77,12 @@ export interface ReceptionPeriod {
   starts_at: string;
   ends_at: string;
   capacity: number;
+  slot_minutes: number;
   free_places: number;
   status: string;
 }
+
+export type PeriodScope = 'upcoming' | 'past' | 'all';
 
 export interface PeriodCreate {
   dean_id: number;
@@ -87,12 +98,35 @@ export interface PeriodUpdate {
   status?: string;
 }
 
+export interface Slot {
+  starts_at: string;
+  ends_at: string;
+  is_free: boolean;
+  is_past: boolean;
+}
+
+export interface WeekSlot extends Slot {
+  period_id: number;
+  dean_name: string;
+}
+
 export interface AppealTopic {
   id: number;
   faculty_id: number;
   title: string;
   description: string | null;
   is_active: boolean;
+}
+
+export interface AppealTopicCreate {
+  title: string;
+  description?: string | null;
+}
+
+export interface AppealTopicUpdate {
+  title?: string;
+  description?: string | null;
+  is_active?: boolean;
 }
 
 export interface AppointmentCreate {
@@ -104,9 +138,10 @@ export interface AppointmentCreate {
 export interface QueueItem {
   id: number;
   period_id: number;
-  topic_id: number;
+  topic_id: number | null;
   question: string;
   queue_number: number;
+  slot_start: string | null;
   status: string;
   created_at: string;
   student_name: string;
@@ -121,9 +156,10 @@ export interface AppointmentResult {
 export interface StudentAppointment {
   id: number;
   period_id: number;
-  topic_id: number;
+  topic_id: number | null;
   question: string;
   queue_number: number;
+  slot_start: string | null;
   status: string;
   created_at: string;
 }
@@ -183,6 +219,14 @@ export class ApiService {
     );
   }
 
+  updateMe(data: ProfileUpdate): Observable<User> {
+    return this.http.patch<User>(
+      `${this.baseUrl}/auth/me`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getToken(): string | null {
     return localStorage.getItem('deanery_access_token');
   }
@@ -223,6 +267,13 @@ export class ApiService {
     );
   }
 
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/users/${userId}`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getDeans(): Observable<Dean[]> {
     return this.http.get<Dean[]>(
       `${this.baseUrl}/deans`,
@@ -246,10 +297,30 @@ export class ApiService {
     );
   }
 
-  getPeriods(): Observable<ReceptionPeriod[]> {
+  getPeriods(scope: PeriodScope = 'upcoming'): Observable<ReceptionPeriod[]> {
     return this.http.get<ReceptionPeriod[]>(
       `${this.baseUrl}/periods`,
+      {
+        headers: this.getAuthHeaders(),
+        params: { scope },
+      },
+    );
+  }
+
+  getPeriodSlots(periodId: number): Observable<Slot[]> {
+    return this.http.get<Slot[]>(
+      `${this.baseUrl}/periods/${periodId}/slots`,
       { headers: this.getAuthHeaders() },
+    );
+  }
+
+  getSlots(dateFrom: string, dateTo: string): Observable<WeekSlot[]> {
+    return this.http.get<WeekSlot[]>(
+      `${this.baseUrl}/slots`,
+      {
+        headers: this.getAuthHeaders(),
+        params: { date_from: dateFrom, date_to: dateTo },
+      },
     );
   }
 
@@ -287,6 +358,25 @@ export class ApiService {
         headers: this.getAuthHeaders(),
         params: { faculty_id: facultyId },
       },
+    );
+  }
+
+  createTopic(data: AppealTopicCreate): Observable<AppealTopic> {
+    return this.http.post<AppealTopic>(
+      `${this.baseUrl}/topics`,
+      data,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
+  updateTopic(
+    topicId: number,
+    data: AppealTopicUpdate,
+  ): Observable<AppealTopic> {
+    return this.http.patch<AppealTopic>(
+      `${this.baseUrl}/topics/${topicId}`,
+      data,
+      { headers: this.getAuthHeaders() },
     );
   }
 
