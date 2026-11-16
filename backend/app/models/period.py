@@ -22,6 +22,7 @@ class ReceptionPeriod(Model):
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     capacity: Mapped[int] = mapped_column(Integer)
     slot_minutes: Mapped[int] = mapped_column(Integer, default=15, server_default="15")
+    room: Mapped[str | None] = mapped_column(String(100))
     next_queue_number: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(16), default="open")
 

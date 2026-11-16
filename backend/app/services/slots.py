@@ -54,6 +54,6 @@ def week_slots(session, user, date_from, date_to):
     for period in PeriodRepository.get_open_in_range(user.faculty_id, start, end, session):
         for item in slot_states(period, AppointmentRepository.get_taken_starts(period.id, session)):
             if start <= item["starts_at"] < end:
-                result.append({**item, "period_id": period.id, "dean_name": period.dean.full_name})
+                result.append({**item, "period_id": period.id, "dean_name": period.dean.full_name, "room": period.room})
     result.sort(key=lambda item: item["starts_at"])
     return result

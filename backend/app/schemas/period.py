@@ -1,4 +1,4 @@
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, Field
 
 
 class SPeriodBase(BaseModel):
@@ -9,6 +9,7 @@ class SPeriodBase(BaseModel):
 class SPeriodAdd(SPeriodBase):
     dean_id: int | None = None
     slot_minutes: int = 15
+    room: str = Field(min_length=1, max_length=100)
 
 
 class SPeriodPatch(BaseModel):
@@ -16,6 +17,7 @@ class SPeriodPatch(BaseModel):
     starts_at: AwareDatetime | None = None
     ends_at: AwareDatetime | None = None
     slot_minutes: int | None = None
+    room: str | None = Field(default=None, min_length=1, max_length=100)
 
 
 class SPeriod(SPeriodBase):
@@ -23,6 +25,7 @@ class SPeriod(SPeriodBase):
     faculty_id: int
     dean_id: int
     dean_name: str
+    room: str | None
     capacity: int
     slot_minutes: int
     free_places: int
@@ -39,3 +42,4 @@ class SSlot(BaseModel):
 class SWeekSlot(SSlot):
     period_id: int
     dean_name: str
+    room: str | None

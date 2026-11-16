@@ -14,6 +14,7 @@ def to_out(session, period):
         faculty_id=period.faculty_id,
         dean_id=period.dean_id,
         dean_name=period.dean.full_name,
+        room=period.room,
         starts_at=period.starts_at,
         ends_at=period.ends_at,
         capacity=len(states),
@@ -64,6 +65,7 @@ def create_period(session, secretary, data):
         ends_at=data.ends_at,
         capacity=slots.total_slots(data.starts_at, data.ends_at, data.slot_minutes),
         slot_minutes=data.slot_minutes,
+        room=data.room.strip(),
     )
     return PeriodRepository.add_one(period, session)
 
@@ -77,12 +79,15 @@ def update_period(session, secretary, period_id, data):
 
     if PeriodRepository.count_taken(period.id, session) > 0:
         if data.dean_id or data.starts_at or data.slot_minutes:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "После первой записи можно только продлить окончание")
-        if data.ends_at is None or data.ends_at <= period.ends_at:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Окончание можно только продлить")
-        check_overlap(session, period.dean_id, period.starts_at, data.ends_at, period.id)
-        period.ends_at = data.ends_at
-        period.capacity = slots.total_slots(period.starts_at, period.ends_at, period.slot_minutes)
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "После первой записи можно только продлить окончание или сменить аудиторию")
+        if data.ends_at is not None:
+            if data.ends_at <= period.ends_at:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "Окончание можно только продлить")
+            check_overlap(session, period.dean_id, period.starts_at, data.ends_at, period.id)
+            period.ends_at = data.ends_at
+            period.capacity = slots.total_slots(period.starts_at, period.ends_at, period.slot_minutes)
+        if data.room is not None:
+            period.room = data.room.strip()
         return PeriodRepository.add_one(period, session)
 
     dean_id = data.dean_id or period.dean_id
@@ -97,6 +102,8 @@ def update_period(session, secretary, period_id, data):
     period.ends_at = ends_at
     period.slot_minutes = slot_minutes
     period.capacity = slots.total_slots(starts_at, ends_at, slot_minutes)
+    if data.room is not None:
+        period.room = data.room.strip()
     return PeriodRepository.add_one(period, session)
 
 
