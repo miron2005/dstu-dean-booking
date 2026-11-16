@@ -13,13 +13,14 @@ import {
   User,
 } from '../../core/api';
 import { RoleAvatar } from '../../shared/role-avatar';
+import { CallAlert } from '../../shared/call-alert';
 
 type AppointmentFilter = 'all' | 'upcoming' | 'done' | 'cancelled';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [RouterLink, RoleAvatar],
+  imports: [RouterLink, RoleAvatar, CallAlert],
   templateUrl: './my-appointments.html',
   styleUrl: './my-appointments.css',
 })

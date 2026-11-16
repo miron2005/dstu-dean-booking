@@ -18,11 +18,12 @@ import {
   StudentNotification,
 } from '../../core/api';
 import { RoleAvatar } from '../../shared/role-avatar';
+import { CallAlert } from '../../shared/call-alert';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [RouterLink, FormsModule, RoleAvatar],
+  imports: [RouterLink, FormsModule, RoleAvatar, CallAlert],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
@@ -84,18 +85,34 @@ export class StudentDashboard implements OnInit {
       },
     });
 
+    this.loadAppointments();
+    this.loadNotifications();
+
+    this.api.getPeriods().subscribe({
+      next: (periods) => {
+
+        this.periods = periods;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Ошибка загрузки периодов:', error);
+      },
+    });
+  }
+
+  loadAppointments(): void {
     this.api.getMyAppointments().subscribe({
       next: (appointments) => {
-
         this.appointments = appointments;
         this.cdr.detectChanges();
-
       },
       error: (error) => {
         console.error('Ошибка загрузки записей:', error);
       },
     });
+  }
 
+  loadNotifications(): void {
     this.api.getNotifications().subscribe({
       next: (notifications) => {
         const readIds = this.getReadNotificationIds();
@@ -117,17 +134,11 @@ export class StudentDashboard implements OnInit {
         console.error('Ошибка загрузки уведомлений:', error);
       },
     });
+  }
 
-    this.api.getPeriods().subscribe({
-      next: (periods) => {
-
-        this.periods = periods;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Ошибка загрузки периодов:', error);
-      },
-    });
+  onAppointmentsChanged(): void {
+    this.loadAppointments();
+    this.loadNotifications();
   }
 
   private loadTopics(facultyId: number): void {
@@ -256,8 +267,9 @@ export class StudentDashboard implements OnInit {
   get upcomingAppointments(): StudentAppointment[] {
     return this.appointments.filter(
       (appointment) =>
-        appointment.status === 'active' &&
-        this.getStartTime(appointment) > Date.now(),
+        appointment.status === 'called' ||
+        (appointment.status === 'active' &&
+          this.getStartTime(appointment) > Date.now()),
     );
   }
 
@@ -276,6 +288,14 @@ export class StudentDashboard implements OnInit {
   }
 
   get nextAppointment(): StudentAppointment | null {
+    const called = this.upcomingAppointments.find(
+      (appointment) => appointment.status === 'called',
+    );
+
+    if (called) {
+      return called;
+    }
+
     const sorted = [...this.upcomingAppointments].sort(
       (a, b) => this.getStartTime(a) - this.getStartTime(b),
     );

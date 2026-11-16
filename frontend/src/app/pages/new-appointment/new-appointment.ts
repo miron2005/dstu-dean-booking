@@ -14,6 +14,7 @@ import {
   User,
   WeekSlot,
 } from '../../core/api';
+import { CallAlert } from '../../shared/call-alert';
 
 interface CalendarDay {
   date: Date;
@@ -24,7 +25,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-new-appointment',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CallAlert],
   templateUrl: './new-appointment.html',
   styleUrl: './new-appointment.css',
 })
