@@ -44,6 +44,12 @@ def create_appointment(session, student, data):
     return AppointmentRepository.add_one(appointment, session)
 
 
+def release_slot_if_early(appointment, new_status):
+    now = datetime.now(timezone.utc)
+    if new_status == "accepted" and appointment.slot_start is not None and appointment.slot_start > now:
+        appointment.slot_start = now
+
+
 def cancel_appointment(session, student, appointment_id):
     appointment = AppointmentRepository.get_one(appointment_id, session)
     if appointment is None or appointment.student_id != student.id:
@@ -93,6 +99,7 @@ def set_result(session, dean, appointment_id, data):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Сначала нужно вызвать номер")
     appointment.status = data.status
     appointment.result_comment = data.result_comment
+    release_slot_if_early(appointment, data.status)
     return AppointmentRepository.add_one(appointment, session)
 
 
@@ -125,6 +132,7 @@ def change_status(session, staff, appointment_id, data):
             f"Нельзя перевести запись из статуса {appointment.status} в {data.status}",
         )
     appointment.status = data.status
+    release_slot_if_early(appointment, data.status)
     if data.result_comment is not None:
         appointment.result_comment = data.result_comment
     if data.status == "called":
