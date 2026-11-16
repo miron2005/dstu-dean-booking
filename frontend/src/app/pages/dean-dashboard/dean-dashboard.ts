@@ -10,6 +10,10 @@ import {
   ReceptionPeriod,
   QueueItem,
 } from '../../core/api';
+import {
+  PERIOD_PHASE_LABELS,
+  getPeriodPhase,
+} from '../../core/period-phase';
 import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
@@ -377,8 +381,12 @@ export class DeanDashboard implements OnInit {
     return this.selectedAppointment?.status === 'called';
   }
 
-  getPeriodStatusLabel(status: string): string {
-    return status === 'open' ? 'Открыт' : status === 'cancelled' ? 'Отменён' : status;
+  getPeriodStatusLabel(period: ReceptionPeriod): string {
+    return PERIOD_PHASE_LABELS[getPeriodPhase(period)];
+  }
+
+  getPeriodPhaseClass(period: ReceptionPeriod): string {
+    return `is-${getPeriodPhase(period)}`;
   }
 
   getStatusLabel(status: string): string {

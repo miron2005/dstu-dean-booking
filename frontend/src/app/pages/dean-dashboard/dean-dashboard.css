@@ -842,3 +842,11 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.period-status.is-upcoming::before {
+  background: #b9954f;
+}
+
+.period-status.is-finished::before {
+  background: #9ca3af;
+}

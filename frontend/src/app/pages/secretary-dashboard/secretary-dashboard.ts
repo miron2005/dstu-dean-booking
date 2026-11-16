@@ -9,6 +9,11 @@ import {
   ReceptionPeriod,
   User,
 } from '../../core/api';
+import {
+  PERIOD_PHASE_LABELS,
+  PeriodPhase,
+  getPeriodPhase,
+} from '../../core/period-phase';
 import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
@@ -429,20 +434,19 @@ export class SecretaryDashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  getStatusLabel(status: string): string {
-    const statuses: Record<string, string> = {
-      open: 'Активен',
-      active: 'Активен',
-      cancelled: 'Отменён',
-      completed: 'Завершён',
-      closed: 'Закрыт',
-    };
-
-    return statuses[status] || status;
+  getPeriodStatusLabel(period: ReceptionPeriod): string {
+    return PERIOD_PHASE_LABELS[getPeriodPhase(period)];
   }
 
-  getStatusClass(status: string): string {
-    return status === 'open' ? 'active' : status;
+  getPeriodStatusClass(period: ReceptionPeriod): string {
+    const classes: Record<PeriodPhase, string> = {
+      upcoming: 'upcoming',
+      ongoing: 'active',
+      finished: 'closed',
+      cancelled: 'cancelled',
+    };
+
+    return classes[getPeriodPhase(period)];
   }
 
   private toLocalDateTime(value: string): string {
