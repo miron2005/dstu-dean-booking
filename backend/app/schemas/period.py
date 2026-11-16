@@ -2,12 +2,12 @@ from pydantic import AwareDatetime, BaseModel
 
 
 class SPeriodBase(BaseModel):
-    dean_id: int
     starts_at: AwareDatetime
     ends_at: AwareDatetime
 
 
 class SPeriodAdd(SPeriodBase):
+    dean_id: int | None = None
     slot_minutes: int = 15
 
 
@@ -21,6 +21,7 @@ class SPeriodPatch(BaseModel):
 class SPeriod(SPeriodBase):
     id: int
     faculty_id: int
+    dean_id: int
     dean_name: str
     capacity: int
     slot_minutes: int

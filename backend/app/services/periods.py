@@ -23,6 +23,15 @@ def to_out(session, period):
     )
 
 
+def default_dean_id(session, faculty_id):
+    deans = UserRepository.get_deans(faculty_id, session)
+    if not deans:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "На факультете нет активного декана")
+    if len(deans) > 1:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "На факультете несколько деканов, укажите dean_id")
+    return deans[0].id
+
+
 def check_dean(session, dean_id, faculty_id):
     dean = UserRepository.get_one(dean_id, session)
     if dean is None or dean.role != "dean" or dean.faculty_id != faculty_id or not dean.is_active:
@@ -45,11 +54,12 @@ def check_overlap(session, dean_id, starts_at, ends_at, exclude_id=None):
 
 def create_period(session, secretary, data):
     check_time(data.starts_at, data.ends_at, data.slot_minutes)
-    check_dean(session, data.dean_id, secretary.faculty_id)
-    check_overlap(session, data.dean_id, data.starts_at, data.ends_at)
+    dean_id = data.dean_id or default_dean_id(session, secretary.faculty_id)
+    check_dean(session, dean_id, secretary.faculty_id)
+    check_overlap(session, dean_id, data.starts_at, data.ends_at)
     period = ReceptionPeriod(
         faculty_id=secretary.faculty_id,
-        dean_id=data.dean_id,
+        dean_id=dean_id,
         starts_at=data.starts_at,
         ends_at=data.ends_at,
         capacity=slots.total_slots(data.starts_at, data.ends_at, data.slot_minutes),
