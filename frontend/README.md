@@ -1,59 +1,74 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
+Веб-интерфейс записи студентов ДГТУ на приём к деканам. Angular 22, TypeScript. Работает с API из `../backend`.
 
-## Development server
+## Требования
 
-To start a local development server, run:
+- Node.js и npm (проверено на Node 25, npm 11)
+- запущенный backend, см. [backend/README.md](../backend/README.md)
 
-```bash
-ng serve
-```
+## Запуск
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Из папки `frontend`:
 
 ```bash
-ng generate component component-name
+npm install
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Приложение: http://localhost:4200. При изменении файлов страница перезагружается сама.
 
-```bash
-ng generate --help
+## Команды
+
+| Команда | Что делает |
+|---|---|
+| `npm start` | сервер разработки |
+| `npm run build` | сборка в `dist/` |
+| `npm run watch` | сборка с пересборкой при изменениях |
+| `npm test` | тесты (Vitest) |
+
+## Подключение к API
+
+Адрес backend задан в `src/app/core/api.ts` (`baseUrl`, по умолчанию `http://127.0.0.1:8000`). При другом адресе его нужно изменить там, а на сервере добавить адрес фронтенда в `CORS_ORIGINS`.
+
+## Структура
+
+```
+src/app/
+  core/
+    api.ts            все запросы к API, хранение токена
+    period-phase.ts   фаза периода: запланирован, идёт приём, завершён
+  shared/             общие части (окно вызова, аватар роли)
+  pages/              страницы
+  app.routes.ts       маршруты
 ```
 
-## Building
+## Страницы
 
-To build the project run:
+| Маршрут | Страница | Роль |
+|---|---|---|
+| `/` | главная | все |
+| `/login` | вход | все |
+| `/register` | регистрация | студент |
+| `/student` | кабинет студента | студент |
+| `/student/new-appointment` | запись на приём | студент |
+| `/student/my-appointments` | мои записи | студент |
+| `/secretary` | темы и периоды приёма | секретарь |
+| `/dean` | очередь, вызов студентов | декан |
+| `/admin` | факультеты и пользователи | администратор |
 
-```bash
-ng build
-```
+Остальные адреса перенаправляют на главную.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Авторизация
 
-## Running unit tests
+После входа токен сохраняется в `localStorage` под ключом `deanery_access_token` и передаётся в заголовке `Authorization: Bearer <токен>`. Выход удаляет токен.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Тестовые аккаунты
 
-```bash
-ng test
-```
+Появляются после запуска seed на backend, пароль у всех `test12345`:
 
-## Running end-to-end tests
+- студент: `student1@test.ru`
+- секретарь: `secretary1@test.ru`
+- декан: `dean1@test.ru`
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Администратора создаёт `create_admin`, см. backend.
