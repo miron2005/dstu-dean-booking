@@ -98,7 +98,30 @@
       <div class="section-heading">
         <div>
           <h2>Приёмные периоды</h2>
-          <p>Выберите период, чтобы посмотреть очередь студентов</p>
+          <p>
+            {{ isUpcoming ? 'Актуальные и будущие периоды' : 'Прошедшие периоды приёма' }}.
+            Выберите период, чтобы посмотреть очередь студентов
+          </p>
+        </div>
+
+        <div class="scope-switch">
+          <button
+            type="button"
+            class="scope-button"
+            [class.active]="isUpcoming"
+            (click)="setScope('upcoming')"
+          >
+            Актуальные
+          </button>
+
+          <button
+            type="button"
+            class="scope-button"
+            [class.active]="!isUpcoming"
+            (click)="setScope('past')"
+          >
+            Прошедшие приёмы
+          </button>
         </div>
       </div>
 
@@ -107,8 +130,12 @@
       </div>
 
       <div class="empty-state" *ngIf="!loading && periods.length === 0">
-        <h3>Приёмных периодов пока нет</h3>
-        <p>Когда секретарь создаст период приёма, он появится здесь.</p>
+        <h3>
+          {{ isUpcoming ? 'Приёмных периодов пока нет' : 'Прошедших периодов нет' }}
+        </h3>
+        <p *ngIf="isUpcoming">
+          Когда секретарь создаст период приёма, он появится здесь.
+        </p>
       </div>
 
       <div class="period-grid" *ngIf="periods.length > 0">
@@ -120,7 +147,7 @@
         >
           <div class="period-card-top">
             <span class="period-label">ПРИЁМНЫЙ ПЕРИОД</span>
-            <span class="period-status">{{ period.status }}</span>
+            <span class="period-status">{{ getPeriodStatusLabel(period.status) }}</span>
           </div>
 
           <strong class="period-date">
@@ -133,7 +160,7 @@
           </div>
 
           <div class="period-capacity">
-            <span>Свободные места</span>
+            <span>Свободные окна ({{ period.slot_minutes }} мин)</span>
             <strong>{{ period.free_places }} / {{ period.capacity }}</strong>
           </div>
 
@@ -185,7 +212,7 @@
       <div class="queue-list" *ngIf="!queueLoading && queue.length > 0">
         <div class="queue-item" *ngFor="let appointment of queue">
           <div class="queue-number">
-            {{ appointment.queue_number }}
+            {{ appointment.slot_start ? (appointment.slot_start | date:'HH:mm') : appointment.queue_number }}
           </div>
 
           <div class="queue-info">
@@ -218,7 +245,8 @@
           <h2>Результат приёма</h2>
           <p>
             Студент: {{ selectedAppointment.student_name }}
-            · Очередь №{{ selectedAppointment.queue_number }}
+            · Время приёма
+            {{ selectedAppointment.slot_start | date:'dd.MM HH:mm' }}
           </p>
         </div>
       </div>

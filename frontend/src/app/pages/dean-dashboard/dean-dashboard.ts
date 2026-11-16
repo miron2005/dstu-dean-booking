@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import {
   ApiService,
   User,
+  PeriodScope,
   ReceptionPeriod,
   QueueItem,
 } from '../../core/api';
@@ -26,6 +27,7 @@ export class DeanDashboard implements OnInit {
   userLoading = true;
 
   periods: ReceptionPeriod[] = [];
+  scope: PeriodScope = 'upcoming';
   queue: QueueItem[] = [];
 
   selectedPeriod: ReceptionPeriod | null = null;
@@ -93,7 +95,31 @@ export class DeanDashboard implements OnInit {
       },
     });
 
-    this.api.getPeriods().subscribe({
+    this.loadPeriods();
+  }
+
+  get isUpcoming(): boolean {
+    return this.scope === 'upcoming';
+  }
+
+  setScope(scope: PeriodScope): void {
+    if (this.scope === scope) {
+      return;
+    }
+
+    this.scope = scope;
+    this.selectedPeriod = null;
+    this.selectedAppointment = null;
+    this.queue = [];
+    this.loadPeriods();
+  }
+
+  loadPeriods(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    this.api.getPeriods(this.scope).subscribe({
       next: (periods) => {
         this.periods = periods;
         this.loading = false;
@@ -261,6 +287,10 @@ export class DeanDashboard implements OnInit {
 
   get canFinishAppointment(): boolean {
     return this.selectedAppointment?.status === 'called';
+  }
+
+  getPeriodStatusLabel(status: string): string {
+    return status === 'open' ? 'Открыт' : status === 'cancelled' ? 'Отменён' : status;
   }
 
   getStatusLabel(status: string): string {
