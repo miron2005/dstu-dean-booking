@@ -167,22 +167,22 @@
               <div class="appointment-highlight-info">
                 <span class="section-label">Следующая запись</span>
 
-                <h3>Приём у деканата</h3>
+                <h3>Приём у декана</h3>
 
-                @if (getPeriod(appointment.period_id); as period) {
-                  <p>
-                    {{ formatDate(period.starts_at) }}
-                  </p>
+                <p>
+                  {{ formatDate(appointment.slot_start) }}
+                </p>
 
-                  <p>
-                    {{ formatTime(period.starts_at) }}
-                    –
-                    {{ formatTime(period.ends_at) }}
-                  </p>
+                <p>
+                  Время: {{ formatTime(appointment.slot_start) }}
+                </p>
+
+                @if (user?.dean_name) {
+                  <p>Декан: {{ user?.dean_name }}</p>
                 }
 
                 <p>
-                  Номер в очереди: {{ appointment.queue_number }}
+                  Тема: {{ getTopicTitle(appointment) }}
                 </p>
 
                 <span class="appointment-status">
@@ -195,7 +195,7 @@
             <div class="empty-state">
               <h3>У вас пока нет предстоящих приёмов</h3>
               <p>
-                Вы можете выбрать удобное время и записаться на приём.
+                Выберите доступное время в календаре и запишитесь на приём.
               </p>
 
               <a
@@ -228,26 +228,16 @@
                 <article class="appointment-card">
 
                   <div class="appointment-card-main">
-                    <h3>Запись на приём</h3>
-
-                    @if (getPeriod(appointment.period_id); as period) {
-                      <p>
-                        {{ formatDate(period.starts_at) }}
-                      </p>
-
-                      <p>
-                        Время:
-                        {{ formatTime(period.starts_at) }}
-                        –
-                        {{ formatTime(period.ends_at) }}
-                      </p>
-                    } @else {
-                      <p>Информация о времени пока недоступна</p>
-                    }
+                    <h3>{{ getTopicTitle(appointment) }}</h3>
 
                     <p>
-                      Номер в очереди: {{ appointment.queue_number }}
+                      {{ formatDate(appointment.slot_start) }},
+                      {{ formatTime(appointment.slot_start) }}
                     </p>
+
+                    @if (user?.dean_name) {
+                      <p>Декан: {{ user?.dean_name }}</p>
+                    }
                   </div>
 
                   <div class="appointment-card-status">
@@ -344,8 +334,18 @@
               </div>
 
               <div class="profile-field">
-                <span>Роль</span>
-                <strong>Студент</strong>
+                <span>Факультет</span>
+                <strong>{{ user?.faculty_name || 'Не указан' }}</strong>
+              </div>
+
+              <div class="profile-field">
+                <span>Группа</span>
+                <strong>{{ user?.group_name || 'Не указана' }}</strong>
+              </div>
+
+              <div class="profile-field">
+                <span>Декан</span>
+                <strong>{{ user?.dean_name || 'Не назначен' }}</strong>
               </div>
 
               <div class="profile-field">
@@ -358,55 +358,61 @@
 
           </div>
 
-        </section>
-
-        <section class="content-section">
-
-          <div class="section-heading">
-            <div>
-              <h2>Быстрые действия</h2>
-              <p>Что вы хотите сделать?</p>
-            </div>
-          </div>
-
-          <div class="actions-grid">
-
-            <a
-              routerLink="/student/new-appointment"
-              class="action-card"
+          @if (!editingProfile) {
+            <button
+              type="button"
+              class="primary-button"
+              (click)="startProfileEdit()"
             >
-              <h3>Новая запись</h3>
-              <p>
-                Выберите тему и удобное время приёма.
-              </p>
-              <span>Перейти</span>
-            </a>
+              Изменить ФИО и группу
+            </button>
+          } @else {
+            <form class="profile-edit" (ngSubmit)="saveProfile()">
+              <label>
+                <span>ФИО</span>
+                <input
+                  type="text"
+                  name="profileName"
+                  [(ngModel)]="profileName"
+                  maxlength="200"
+                  required
+                >
+              </label>
 
-            <a
-              href="#appointments"
-              class="action-card"
-              (click)="$event.preventDefault(); scrollToAppointments()"
-            >
-              <h3>Мои записи</h3>
-              <p>
-                Посмотрите информацию о ваших обращениях.
-              </p>
-              <span>Перейти</span>
-            </a>
+              <label>
+                <span>Группа</span>
+                <input
+                  type="text"
+                  name="profileGroup"
+                  [(ngModel)]="profileGroup"
+                  maxlength="50"
+                  required
+                >
+              </label>
 
-            <a
-              href="#notifications"
-              class="action-card"
-              (click)="$event.preventDefault(); scrollToNotifications()"
-            >
-              <h3>Уведомления</h3>
-              <p>
-                Ознакомьтесь с последними сообщениями.
-              </p>
-              <span>Перейти</span>
-            </a>
+              @if (profileError) {
+                <p class="profile-error">{{ profileError }}</p>
+              }
 
-          </div>
+              <div class="profile-edit-actions">
+                <button
+                  type="submit"
+                  class="primary-button"
+                  [disabled]="profileSaving"
+                >
+                  {{ profileSaving ? 'Сохранение...' : 'Сохранить' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="text-link"
+                  (click)="cancelProfileEdit()"
+                >
+                  Отмена
+                </button>
+              </div>
+            </form>
+          }
 
         </section>
 

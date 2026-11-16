@@ -6,11 +6,13 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 
+import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 
 import {
   ApiService,
   User,
+  AppealTopic,
   ReceptionPeriod,
   StudentAppointment,
   StudentNotification,
@@ -20,7 +22,7 @@ import { RoleAvatar } from '../../shared/role-avatar';
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [RouterLink, RoleAvatar],
+  imports: [RouterLink, FormsModule, RoleAvatar],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
@@ -35,12 +37,18 @@ export class StudentDashboard implements OnInit {
   appointments: StudentAppointment[] = [];
   notifications: StudentNotification[] = [];
   periods: ReceptionPeriod[] = [];
+  topics: AppealTopic[] = [];
+
+  editingProfile = false;
+  profileName = '';
+  profileGroup = '';
+  profileSaving = false;
+  profileError = '';
 
   loading = true;
   errorMessage = '';
 
   ngOnInit(): void {
-    console.log('1. StudentDashboard запущен');
 
     if (!this.api.getToken()) {
       this.router.navigate(['/login']);
@@ -49,13 +57,15 @@ export class StudentDashboard implements OnInit {
 
     this.api.getMe().subscribe({
       next: (user) => {
-        console.log('2. Получены данные пользователя:', user);
 
         this.user = user;
         this.loading = false;
         this.cdr.detectChanges();
 
-        console.log('3. Значение loading:', this.loading);
+        if (user.faculty_id != null) {
+          this.loadTopics(user.faculty_id);
+        }
+
       },
       error: (error) => {
         console.error('Ошибка загрузки пользователя:', error);
@@ -76,12 +86,10 @@ export class StudentDashboard implements OnInit {
 
     this.api.getMyAppointments().subscribe({
       next: (appointments) => {
-        console.log('Записи студента получены:', appointments);
 
         this.appointments = appointments;
         this.cdr.detectChanges();
 
-        console.log('Количество записей:', this.appointments.length);
       },
       error: (error) => {
         console.error('Ошибка загрузки записей:', error);
@@ -112,13 +120,24 @@ export class StudentDashboard implements OnInit {
 
     this.api.getPeriods().subscribe({
       next: (periods) => {
-        console.log('Периоды приёма получены:', periods);
 
         this.periods = periods;
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Ошибка загрузки периодов:', error);
+      },
+    });
+  }
+
+  private loadTopics(facultyId: number): void {
+    this.api.getTopics(facultyId).subscribe({
+      next: (topics) => {
+        this.topics = topics;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Ошибка загрузки тем:', error);
       },
     });
   }
@@ -199,15 +218,15 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  scrollToProfile(): void {
-    document.getElementById('profile')?.scrollIntoView({
+  scrollToAppointments(): void {
+    document.getElementById('appointments')?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
   }
 
-  scrollToAppointments(): void {
-    document.getElementById('appointments')?.scrollIntoView({
+  scrollToProfile(): void {
+    document.getElementById('profile')?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
@@ -227,39 +246,27 @@ export class StudentDashboard implements OnInit {
   }
 
   get visibleAppointments(): StudentAppointment[] {
-    const currentTime = Date.now();
-
-    return this.appointments.filter((appointment) => {
-      const period = this.getPeriod(appointment.period_id);
-
-      if (!period) {
-        return false;
-      }
-
-      const endTime = new Date(period.ends_at).getTime();
-
-      return Number.isFinite(endTime) && endTime > currentTime;
-    });
+    return this.appointments.filter(
+      (appointment) =>
+        appointment.status === 'active' ||
+        appointment.status === 'called',
+    );
   }
 
   get upcomingAppointments(): StudentAppointment[] {
-    return this.appointments.filter((appointment) => {
-      const period = this.getPeriod(appointment.period_id);
-
-      return period
-        ? new Date(period.starts_at).getTime() > Date.now()
-        : false;
-    });
+    return this.appointments.filter(
+      (appointment) =>
+        appointment.status === 'active' &&
+        this.getStartTime(appointment) > Date.now(),
+    );
   }
 
   get completedAppointments(): StudentAppointment[] {
-    return this.appointments.filter((appointment) => {
-      const period = this.getPeriod(appointment.period_id);
-
-      return period
-        ? new Date(period.ends_at).getTime() < Date.now()
-        : false;
-    });
+    return this.appointments.filter(
+      (appointment) =>
+        appointment.status === 'accepted' ||
+        appointment.status === 'no_show',
+    );
   }
 
   get unreadNotifications(): number {
@@ -269,17 +276,70 @@ export class StudentDashboard implements OnInit {
   }
 
   get nextAppointment(): StudentAppointment | null {
-    const sorted = [...this.upcomingAppointments].sort((a, b) => {
-      const periodA = this.getPeriod(a.period_id);
-      const periodB = this.getPeriod(b.period_id);
-
-      return (
-        new Date(periodA?.starts_at ?? 0).getTime() -
-        new Date(periodB?.starts_at ?? 0).getTime()
-      );
-    });
+    const sorted = [...this.upcomingAppointments].sort(
+      (a, b) => this.getStartTime(a) - this.getStartTime(b),
+    );
 
     return sorted[0] ?? null;
+  }
+
+  private getStartTime(appointment: StudentAppointment): number {
+    return appointment.slot_start
+      ? new Date(appointment.slot_start).getTime()
+      : 0;
+  }
+
+  getTopicTitle(appointment: StudentAppointment): string {
+    if (appointment.topic_id == null) {
+      return 'Другое';
+    }
+
+    return (
+      this.topics.find((topic) => topic.id === appointment.topic_id)?.title ??
+      'Тема обращения'
+    );
+  }
+
+  startProfileEdit(): void {
+    this.profileName = this.user?.full_name ?? '';
+    this.profileGroup = this.user?.group_name ?? '';
+    this.profileError = '';
+    this.editingProfile = true;
+  }
+
+  cancelProfileEdit(): void {
+    this.editingProfile = false;
+    this.profileError = '';
+  }
+
+  saveProfile(): void {
+    const fullName = this.profileName.trim();
+    const groupName = this.profileGroup.trim();
+
+    if (!fullName || !groupName) {
+      this.profileError = 'Укажите ФИО и группу.';
+      return;
+    }
+
+    this.profileSaving = true;
+    this.profileError = '';
+
+    this.api.updateMe({ full_name: fullName, group_name: groupName }).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.editingProfile = false;
+        this.profileSaving = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.profileError =
+          typeof error.error?.detail === 'string'
+            ? error.error.detail
+            : 'Не удалось сохранить профиль.';
+        this.profileSaving = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   getPeriod(periodId: number): ReceptionPeriod | undefined {
@@ -300,7 +360,7 @@ export class StudentDashboard implements OnInit {
       .toUpperCase();
   }
 
-  formatDate(value: string | undefined): string {
+  formatDate(value: string | null | undefined): string {
     if (!value) return 'Дата не указана';
 
     const date = new Date(value);
@@ -314,7 +374,7 @@ export class StudentDashboard implements OnInit {
     }).format(date);
   }
 
-  formatTime(value: string | undefined): string {
+  formatTime(value: string | null | undefined): string {
     if (!value) return '';
 
     const date = new Date(value);
