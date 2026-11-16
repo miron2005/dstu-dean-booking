@@ -28,6 +28,8 @@ class SAppointment(SAppointmentBase):
     id: int
     queue_number: int
     slot_start: AwareDatetime | None
+    dean_name: str
+    room: str | None
     status: str
     created_at: AwareDatetime
 

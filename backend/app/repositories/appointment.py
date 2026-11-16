@@ -14,6 +14,7 @@ class AppointmentRepository:
         query = (
             select(Appointment)
             .join(ReceptionPeriod, ReceptionPeriod.id == Appointment.period_id)
+            .options(selectinload(Appointment.period).selectinload(ReceptionPeriod.dean))
             .order_by(Appointment.period_id, Appointment.queue_number)
         )
         if faculty_id is not None:
@@ -29,6 +30,7 @@ class AppointmentRepository:
         query = (
             select(Appointment)
             .where(Appointment.student_id == student_id)
+            .options(selectinload(Appointment.period).selectinload(ReceptionPeriod.dean))
             .order_by(Appointment.created_at.desc())
         )
         return session.scalars(query).all()
@@ -48,6 +50,7 @@ class AppointmentRepository:
             select(Appointment)
             .where(Appointment.period_id == period_id, Appointment.status != "cancelled")
             .options(selectinload(Appointment.student))
+            .options(selectinload(Appointment.period).selectinload(ReceptionPeriod.dean))
             .order_by(Appointment.slot_start, Appointment.queue_number)
         )
         return session.scalars(query).all()

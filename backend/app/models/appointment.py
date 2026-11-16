@@ -39,3 +39,12 @@ class Appointment(Model):
     result_comment: Mapped[str | None] = mapped_column(Text)
 
     student = relationship("User")
+    period = relationship("ReceptionPeriod")
+
+    @property
+    def room(self):
+        return self.period.room
+
+    @property
+    def dean_name(self):
+        return self.period.dean.full_name
