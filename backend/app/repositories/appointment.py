@@ -48,7 +48,7 @@ class AppointmentRepository:
             select(Appointment)
             .where(Appointment.period_id == period_id, Appointment.status != "cancelled")
             .options(selectinload(Appointment.student))
-            .order_by(Appointment.queue_number)
+            .order_by(Appointment.slot_start, Appointment.queue_number)
         )
         return session.scalars(query).all()
 
@@ -74,7 +74,7 @@ class AppointmentRepository:
         query = (
             select(Appointment)
             .where(Appointment.period_id == period_id, Appointment.status == "active")
-            .order_by(Appointment.queue_number)
+            .order_by(Appointment.slot_start, Appointment.queue_number)
             .limit(1)
             .with_for_update()
         )
