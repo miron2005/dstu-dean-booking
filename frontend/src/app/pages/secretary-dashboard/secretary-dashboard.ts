@@ -44,6 +44,7 @@ export class SecretaryDashboard implements OnInit {
     starts_at: '',
     ends_at: '',
     slot_minutes: 15,
+    room: '',
   };
 
   topicForm = {
@@ -154,6 +155,11 @@ export class SecretaryDashboard implements OnInit {
       return;
     }
 
+    if (!this.form.room.trim()) {
+      this.errorMessage = 'Укажите аудиторию, в которой пройдёт приём';
+      return;
+    }
+
     const startsAt = new Date(this.form.starts_at);
     const endsAt = new Date(this.form.ends_at);
 
@@ -179,6 +185,7 @@ export class SecretaryDashboard implements OnInit {
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
       slot_minutes: Number(this.form.slot_minutes),
+      room: this.form.room.trim(),
     };
 
     this.saving = true;
@@ -221,6 +228,7 @@ export class SecretaryDashboard implements OnInit {
       starts_at: this.toLocalDateTime(period.starts_at),
       ends_at: this.toLocalDateTime(period.ends_at),
       slot_minutes: period.slot_minutes,
+      room: period.room ?? '',
     };
 
     this.successMessage = '';
@@ -268,6 +276,7 @@ export class SecretaryDashboard implements OnInit {
       starts_at: '',
       ends_at: '',
       slot_minutes: 15,
+      room: '',
     };
   }
 

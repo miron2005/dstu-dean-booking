@@ -136,9 +136,8 @@
                 }
                 <div class="appointment-meta">
                   <span>{{ getTime(appointment) }}</span>
-                  @if (user?.dean_name) {
-                    <span>Декан: {{ user?.dean_name }}</span>
-                  }
+                  <span>Декан: {{ appointment.dean_name }}</span>
+                  <span>Аудитория: {{ appointment.room || 'не указана' }}</span>
                 </div>
               </div>
 

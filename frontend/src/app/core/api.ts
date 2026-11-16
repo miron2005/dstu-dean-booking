@@ -75,6 +75,7 @@ export interface ReceptionPeriod {
   faculty_id: number;
   dean_id: number;
   dean_name?: string;
+  room?: string | null;
   starts_at: string;
   ends_at: string;
   capacity: number;
@@ -89,12 +90,14 @@ export interface PeriodCreate {
   starts_at: string;
   ends_at: string;
   slot_minutes: number;
+  room: string;
 }
 
 export interface PeriodUpdate {
   starts_at?: string;
   ends_at?: string;
   slot_minutes?: number;
+  room?: string;
 }
 
 export interface Slot {
@@ -107,6 +110,7 @@ export interface Slot {
 export interface WeekSlot extends Slot {
   period_id: number;
   dean_name: string;
+  room: string | null;
 }
 
 export interface AppealTopic {
@@ -142,6 +146,8 @@ export interface QueueItem {
   question: string;
   queue_number: number;
   slot_start: string | null;
+  dean_name: string;
+  room: string | null;
   status: string;
   created_at: string;
   student_name: string;
@@ -160,6 +166,8 @@ export interface StudentAppointment {
   question: string;
   queue_number: number;
   slot_start: string | null;
+  dean_name: string;
+  room: string | null;
   status: string;
   created_at: string;
 }

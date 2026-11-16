@@ -118,6 +118,8 @@
           {{ formatTime(selectedSlot.ends_at) }}
           <br>
           Декан: {{ selectedSlot.dean_name }}
+          <br>
+          Аудитория: {{ selectedSlot.room || 'будет сообщена дополнительно' }}
         </p>
 
         <form (ngSubmit)="confirm()">

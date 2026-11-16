@@ -177,9 +177,11 @@
                   Время: {{ formatTime(appointment.slot_start) }}
                 </p>
 
-                @if (user?.dean_name) {
-                  <p>Декан: {{ user?.dean_name }}</p>
-                }
+                <p>Декан: {{ appointment.dean_name }}</p>
+
+                <p>
+                  Аудитория: {{ appointment.room || 'не указана' }}
+                </p>
 
                 <p>
                   Тема: {{ getTopicTitle(appointment) }}
@@ -235,9 +237,10 @@
                       {{ formatTime(appointment.slot_start) }}
                     </p>
 
-                    @if (user?.dean_name) {
-                      <p>Декан: {{ user?.dean_name }}</p>
-                    }
+                    <p>
+                      Декан: {{ appointment.dean_name }},
+                      аудитория: {{ appointment.room || 'не указана' }}
+                    </p>
                   </div>
 
                   <div class="appointment-card-status">

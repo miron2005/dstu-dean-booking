@@ -207,6 +207,8 @@ export class NewAppointment implements OnInit {
       next: () => {
         this.successMessage =
           `Вы записаны на ${this.formatDate(slot.starts_at)} в ${this.formatTime(slot.starts_at)}. ` +
+          `Декан: ${slot.dean_name}. ` +
+          `Аудитория: ${slot.room || 'будет сообщена дополнительно'}. ` +
           'Запись доступна в разделе «Мои записи».';
 
         this.saving = false;

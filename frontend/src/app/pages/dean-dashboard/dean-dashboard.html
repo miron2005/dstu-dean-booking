@@ -159,6 +159,10 @@
             — {{ period.ends_at | date:'HH:mm' }}
           </div>
 
+          <div class="period-time">
+            Аудитория: {{ period.room || 'не указана' }}
+          </div>
+
           <div class="period-capacity">
             <span>Свободные окна ({{ period.slot_minutes }} мин)</span>
             <strong>{{ period.free_places }} / {{ period.capacity }}</strong>
