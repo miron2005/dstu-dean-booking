@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
@@ -23,8 +23,7 @@ def get_periods(
     periods = PeriodRepository.get_all(user.faculty_id, session, day, dean_id)
     result = [service.to_out(session, period) for period in periods]
     if only_available:
-        now = datetime.now(timezone.utc)
-        result = [p for p in result if p.status == "open" and p.free_places > 0 and p.starts_at > now]
+        result = [p for p in result if p.status == "open" and p.free_places > 0]
     return result
 
 

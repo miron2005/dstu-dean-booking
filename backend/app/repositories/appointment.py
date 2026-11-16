@@ -53,6 +53,15 @@ class AppointmentRepository:
         return session.scalars(query).all()
 
     @classmethod
+    def get_taken_starts(cls, period_id: int, session: Session):
+        query = select(Appointment.slot_start).where(
+            Appointment.period_id == period_id,
+            Appointment.status != "cancelled",
+            Appointment.slot_start.is_not(None),
+        )
+        return set(session.scalars(query).all())
+
+    @classmethod
     def get_active_by_period(cls, period_id: int, session: Session):
         query = select(Appointment).where(
             Appointment.period_id == period_id,
