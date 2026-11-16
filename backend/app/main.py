@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import models
 from app.database import Model, engine
-from app.routers import appointments, auth, deans, faculties, health, notifications, periods, topics, users
+from app.routers import appointments, auth, deans, faculties, health, notifications, periods, slots, topics, users
 
 
 @asynccontextmanager
@@ -30,5 +30,6 @@ app.include_router(deans.router)
 app.include_router(users.router)
 app.include_router(topics.router)
 app.include_router(periods.router)
+app.include_router(slots.router)
 app.include_router(appointments.router)
 app.include_router(notifications.router)

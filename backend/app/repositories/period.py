@@ -26,6 +26,21 @@ class PeriodRepository:
         return session.scalars(query).all()
 
     @classmethod
+    def get_open_in_range(cls, faculty_id: int, start: datetime, end: datetime, session: Session):
+        query = (
+            select(ReceptionPeriod)
+            .where(
+                ReceptionPeriod.faculty_id == faculty_id,
+                ReceptionPeriod.status == "open",
+                ReceptionPeriod.starts_at < end,
+                ReceptionPeriod.ends_at > start,
+            )
+            .options(selectinload(ReceptionPeriod.dean))
+            .order_by(ReceptionPeriod.starts_at)
+        )
+        return session.scalars(query).all()
+
+    @classmethod
     def get_one(cls, period_id: int, session: Session, for_update: bool = False):
         query = select(ReceptionPeriod).where(ReceptionPeriod.id == period_id)
         if for_update:
