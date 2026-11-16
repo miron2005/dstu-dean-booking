@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 Role = Literal["student", "secretary", "dean", "admin"]
 
@@ -13,6 +13,7 @@ class SRegister(SUserBase):
     email: EmailStr
     password: str
     faculty_id: int
+    group_name: str = Field(min_length=1, max_length=50)
 
 
 class SUserAdd(SUserBase):
@@ -34,9 +35,20 @@ class SUser(SUserBase):
     email: str
     role: str
     faculty_id: int | None
+    group_name: str | None
     is_active: bool
 
     model_config = {"from_attributes": True}
+
+
+class SMe(SUser):
+    faculty_name: str | None
+    dean_name: str | None
+
+
+class SMePatch(BaseModel):
+    full_name: str | None = Field(default=None, min_length=1)
+    group_name: str | None = Field(default=None, min_length=1, max_length=50)
 
 
 class SDean(BaseModel):
