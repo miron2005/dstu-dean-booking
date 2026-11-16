@@ -15,6 +15,14 @@ def get_topics(session: SessionDep, faculty_id: int | None = None):
     return TopicRepository.get_all(faculty_id, session)
 
 
+@router.get("/manage", response_model=list[STopic])
+def get_faculty_topics(
+    user: Annotated[User, Depends(require_role("secretary"))],
+    session: SessionDep,
+):
+    return TopicRepository.get_all(user.faculty_id, session, only_active=False)
+
+
 @router.post("", response_model=STopic, status_code=status.HTTP_201_CREATED)
 def create_topic(
     data: STopicAdd,

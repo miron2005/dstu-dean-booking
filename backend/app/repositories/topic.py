@@ -7,8 +7,10 @@ from app.schemas.topic import STopicAdd
 
 class TopicRepository:
     @classmethod
-    def get_all(cls, faculty_id: int | None, session: Session):
-        query = select(AppealTopic).where(AppealTopic.is_active).order_by(AppealTopic.id)
+    def get_all(cls, faculty_id: int | None, session: Session, only_active: bool = True):
+        query = select(AppealTopic).order_by(AppealTopic.id)
+        if only_active:
+            query = query.where(AppealTopic.is_active)
         if faculty_id is not None:
             query = query.where(AppealTopic.faculty_id == faculty_id)
         return session.scalars(query).all()
