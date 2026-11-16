@@ -1,4 +1,3 @@
-
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -6,18 +5,26 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import {
   ApiService,
-  ReceptionPeriod,
+  AppealTopic,
   User,
+  WeekSlot,
 } from '../../core/api';
+
+interface CalendarDay {
+  date: Date;
+  label: string;
+  slots: WeekSlot[];
+}
 
 @Component({
   selector: 'app-new-appointment',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './new-appointment.html',
   styleUrl: './new-appointment.css',
 })
@@ -26,15 +33,21 @@ export class NewAppointment implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
+  topics: AppealTopic[] = [];
 
-  periods: ReceptionPeriod[] = [];
-  topics: any[] = [];
+  weekStart = this.getMonday(new Date());
+  days: CalendarDay[] = [];
 
   loading = true;
-  savingPeriodId: number | null = null;
+  saving = false;
 
   errorMessage = '';
   successMessage = '';
+
+  selectedSlot: WeekSlot | null = null;
+  topicValue = '';
+  question = '';
+  modalError = '';
 
   ngOnInit(): void {
     this.api.getMe().subscribe({
@@ -48,12 +61,10 @@ export class NewAppointment implements OnInit {
           return;
         }
 
-        this.loadPeriods(user.faculty_id);
         this.loadTopics(user.faculty_id);
+        this.loadWeek();
       },
-      error: (error) => {
-        console.error('Ошибка загрузки профиля:', error);
-
+      error: () => {
         this.errorMessage = 'Не удалось загрузить профиль пользователя.';
         this.loading = false;
         this.cdr.detectChanges();
@@ -61,147 +72,244 @@ export class NewAppointment implements OnInit {
     });
   }
 
-  loadPeriods(facultyId: number): void {
-    this.loading = true;
+  get hasSlots(): boolean {
+    return this.days.some((day) => day.slots.length > 0);
+  }
 
-    this.api.getPeriods().subscribe({
-      next: (periods) => {
-        console.log('Полученные окна от сервера:', periods);
-        console.log('Факультет студента:', facultyId);
+  get freeSlotsCount(): number {
+    return this.days.reduce(
+      (sum, day) => sum + day.slots.filter((slot) => this.isBookable(slot)).length,
+      0,
+    );
+  }
 
-        const currentTime = Date.now();
+  get isCurrentWeek(): boolean {
+    return this.weekStart.getTime() <= this.getMonday(new Date()).getTime();
+  }
 
-        this.periods = periods
-          .filter((period) =>
-            Number(period.faculty_id) === Number(facultyId) &&
+  get weekTitle(): string {
+    const end = this.addDays(this.weekStart, 6);
 
-            period.status === 'open' &&
+    return `${this.formatShortDate(this.weekStart)} – ${this.formatShortDate(end)}`;
+  }
 
-            Number(period.free_places) > 0 &&
-
-            new Date(period.ends_at).getTime() > currentTime
-          )
-          .sort(
-            (a, b) =>
-              new Date(a.starts_at).getTime() -
-              new Date(b.starts_at).getTime()
-          );
-
-        console.log('Актуальные окна, доступные студенту:', this.periods);
-
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Ошибка загрузки окон:', error);
-
-        this.errorMessage = 'Не удалось загрузить окна приёма.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    });
+  isBookable(slot: WeekSlot): boolean {
+    return slot.is_free && !slot.is_past;
   }
 
   loadTopics(facultyId: number): void {
     this.api.getTopics(facultyId).subscribe({
-      next: (response: any) => {
-        console.log('Ответ сервера по темам:', response);
-
-        let receivedTopics: any[] = [];
-
-        if (Array.isArray(response)) {
-          receivedTopics = response;
-        } else if (Array.isArray(response?.items)) {
-          receivedTopics = response.items;
-        } else if (Array.isArray(response?.topics)) {
-          receivedTopics = response.topics;
-        }
-
-        this.topics = receivedTopics;
-
-        console.log('Темы, доступные для записи:', this.topics);
-
+      next: (topics) => {
+        this.topics = topics.filter((topic) => topic.is_active);
         this.cdr.detectChanges();
       },
-      error: (error) => {
-        console.error('Ошибка загрузки тем:', error);
-
+      error: () => {
         this.topics = [];
         this.cdr.detectChanges();
       },
     });
   }
 
-  bookPeriod(period: ReceptionPeriod): void {
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if (this.savingPeriodId !== null) {
-      return;
-    }
-
-    if (new Date(period.ends_at).getTime() <= Date.now()) {
-      this.errorMessage = 'Время этого приёма уже прошло. Выберите другое окно.';
-
-      if (this.user?.faculty_id != null) {
-        this.loadPeriods(this.user.faculty_id);
-      }
-
-      this.cdr.detectChanges();
-      return;
-    }
-
-    if (this.topics.length === 0) {
-      this.errorMessage =
-        'Сервер не вернул ни одной темы обращения. Запись пока недоступна.';
-
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const selectedTopic = this.topics[0];
-
-    if (selectedTopic.id == null) {
-      this.errorMessage =
-        'У полученной темы отсутствует идентификатор. Запись невозможна.';
-
-      this.cdr.detectChanges();
-      return;
-    }
-
-    this.savingPeriodId = period.id;
+  loadWeek(): void {
+    this.loading = true;
     this.cdr.detectChanges();
 
-    this.api.createAppointment({
-      period_id: period.id,
-      topic_id: Number(selectedTopic.id),
-      question: '',
-    }).subscribe({
-      next: (appointment) => {
-        this.successMessage =
-          `Вы успешно записаны! Ваш номер в очереди: ${appointment.queue_number}.`;
+    const dateFrom = this.toApiDate(this.addDays(this.weekStart, -1));
+    const dateTo = this.toApiDate(this.addDays(this.weekStart, 7));
 
-        this.savingPeriodId = null;
+    this.api.getSlots(dateFrom, dateTo).subscribe({
+      next: (slots) => {
+        this.days = this.buildDays(slots);
+        this.loading = false;
         this.cdr.detectChanges();
-
-        if (this.user?.faculty_id != null) {
-          this.loadPeriods(this.user.faculty_id);
-        }
       },
       error: (error) => {
-        console.error('Ошибка записи на приём:', error);
-
-        this.errorMessage =
-          error.error?.detail ||
-          'Не удалось записаться. Возможно, окно уже занято или запись закрыта.';
-
-        this.savingPeriodId = null;
+        this.errorMessage = this.readError(
+          error,
+          'Не удалось загрузить календарь приёма.',
+        );
+        this.days = this.buildDays([]);
+        this.loading = false;
         this.cdr.detectChanges();
-
-        if (this.user?.faculty_id != null) {
-          this.loadPeriods(this.user.faculty_id);
-        }
       },
     });
+  }
+
+  previousWeek(): void {
+    if (this.isCurrentWeek) {
+      return;
+    }
+
+    this.weekStart = this.addDays(this.weekStart, -7);
+    this.loadWeek();
+  }
+
+  nextWeek(): void {
+    this.weekStart = this.addDays(this.weekStart, 7);
+    this.loadWeek();
+  }
+
+  currentWeek(): void {
+    this.weekStart = this.getMonday(new Date());
+    this.loadWeek();
+  }
+
+  selectSlot(slot: WeekSlot): void {
+    if (!this.isBookable(slot)) {
+      return;
+    }
+
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.modalError = '';
+    this.topicValue = '';
+    this.question = '';
+    this.selectedSlot = slot;
+  }
+
+  closeModal(): void {
+    if (this.saving) {
+      return;
+    }
+
+    this.selectedSlot = null;
+    this.modalError = '';
+  }
+
+  confirm(): void {
+    if (!this.selectedSlot || this.saving) {
+      return;
+    }
+
+    if (!this.topicValue) {
+      this.modalError = 'Выберите тему обращения.';
+      return;
+    }
+
+    const question = this.question.trim();
+
+    if (!question) {
+      this.modalError = 'Опишите ваш вопрос.';
+      return;
+    }
+
+    const slot = this.selectedSlot;
+
+    this.saving = true;
+    this.modalError = '';
+
+    this.api.createAppointment({
+      period_id: slot.period_id,
+      slot_start: slot.starts_at,
+      topic_id: this.topicValue === 'other' ? null : Number(this.topicValue),
+      question,
+    }).subscribe({
+      next: () => {
+        this.successMessage =
+          `Вы записаны на ${this.formatDate(slot.starts_at)} в ${this.formatTime(slot.starts_at)}. ` +
+          'Запись доступна в разделе «Мои записи».';
+
+        this.saving = false;
+        this.selectedSlot = null;
+        this.loadWeek();
+      },
+      error: (error) => {
+        this.modalError = this.readError(
+          error,
+          'Не удалось записаться. Попробуйте выбрать другое время.',
+        );
+
+        this.saving = false;
+        this.cdr.detectChanges();
+        this.loadWeek();
+      },
+    });
+  }
+
+  formatTime(value: string): string {
+    return new Intl.DateTimeFormat('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(value));
+  }
+
+  formatDate(value: string): string {
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+    }).format(new Date(value));
+  }
+
+  trackByDay(_index: number, day: CalendarDay): number {
+    return day.date.getTime();
+  }
+
+  trackBySlot(_index: number, slot: WeekSlot): string {
+    return `${slot.period_id}-${slot.starts_at}`;
+  }
+
+  private buildDays(slots: WeekSlot[]): CalendarDay[] {
+    const weekdayFormat = new Intl.DateTimeFormat('ru-RU', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+    });
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = this.addDays(this.weekStart, index);
+
+      return {
+        date,
+        label: weekdayFormat.format(date),
+        slots: slots.filter((slot) =>
+          this.isSameDay(new Date(slot.starts_at), date),
+        ),
+      };
+    });
+  }
+
+  private readError(error: { error?: { detail?: unknown } }, fallback: string): string {
+    const detail = error.error?.detail;
+
+    return typeof detail === 'string' ? detail : fallback;
+  }
+
+  private getMonday(value: Date): Date {
+    const date = new Date(value.getFullYear(), value.getMonth(), value.getDate());
+    const shift = (date.getDay() + 6) % 7;
+
+    date.setDate(date.getDate() - shift);
+
+    return date;
+  }
+
+  private addDays(value: Date, days: number): Date {
+    const date = new Date(value.getFullYear(), value.getMonth(), value.getDate());
+
+    date.setDate(date.getDate() + days);
+
+    return date;
+  }
+
+  private isSameDay(a: Date, b: Date): boolean {
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  }
+
+  private toApiDate(value: Date): string {
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+
+    return `${value.getFullYear()}-${month}-${day}`;
+  }
+
+  private formatShortDate(value: Date): string {
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+    }).format(value);
   }
 }

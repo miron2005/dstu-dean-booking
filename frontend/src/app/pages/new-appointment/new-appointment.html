@@ -4,80 +4,172 @@
     <div>
       <div class="page-eyebrow">ЛИЧНЫЙ КАБИНЕТ СТУДЕНТА</div>
       <h1>Запись на приём</h1>
-      <p>Выберите подходящее время из предложенных окон приёма.</p>
+      <p>
+        Выберите свободное окно в календаре. Одно окно занимает
+        только один студент.
+      </p>
     </div>
 
     <a routerLink="/student" class="back-button">Вернуться в кабинет</a>
   </header>
 
-  <div *ngIf="errorMessage" class="message error">
-    {{ errorMessage }}
-  </div>
+  @if (errorMessage) {
+    <div class="message error">{{ errorMessage }}</div>
+  }
 
-  <div *ngIf="successMessage" class="message success">
-    {{ successMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="message success">{{ successMessage }}</div>
+  }
 
-  <section class="periods-section">
+  <section class="calendar-section">
 
-    <div class="section-heading">
-      <div>
-        <h2>Доступные окна</h2>
-        <p>Выберите одно свободное время для посещения деканата.</p>
-      </div>
+    <div class="calendar-toolbar">
+      <div class="week-switcher">
+        <button
+          type="button"
+          class="week-button"
+          (click)="previousWeek()"
+          [disabled]="isCurrentWeek || loading"
+        >
+          ← Предыдущая
+        </button>
 
-      <span class="periods-count" *ngIf="!loading">
-        Доступно: {{ periods.length }}
-      </span>
-    </div>
-
-    <div *ngIf="loading" class="loading-state">
-      Загружаем доступные окна...
-    </div>
-
-    <div *ngIf="!loading && periods.length > 0" class="periods-list">
-
-      <article class="period-card" *ngFor="let period of periods">
-
-        <div class="period-date-block">
-          <span class="date-label">ДАТА ПРИЁМА</span>
-          <strong>{{ period.starts_at | date:'dd.MM.yyyy' }}</strong>
-        </div>
-
-        <div class="period-time-block">
-          <span class="date-label">ВРЕМЯ</span>
-          <strong>
-            {{ period.starts_at | date:'HH:mm' }}
-            –
-            {{ period.ends_at | date:'HH:mm' }}
-          </strong>
-        </div>
-
-        <div class="period-places-block">
-          <span class="date-label">СВОБОДНЫЕ МЕСТА</span>
-          <strong>{{ period.free_places }}</strong>
-        </div>
+        <strong class="week-title">{{ weekTitle }}</strong>
 
         <button
           type="button"
-          class="book-button"
-          [disabled]="savingPeriodId !== null"
-          (click)="bookPeriod(period)"
+          class="week-button"
+          (click)="nextWeek()"
+          [disabled]="loading"
         >
-          {{ savingPeriodId === period.id ? 'Записываем...' : 'Записаться' }}
+          Следующая →
         </button>
+      </div>
 
-      </article>
+      <div class="calendar-meta">
+        @if (!isCurrentWeek) {
+          <button type="button" class="link-button" (click)="currentWeek()">
+            К текущей неделе
+          </button>
+        }
 
+        @if (!loading) {
+          <span class="periods-count">Свободных окон: {{ freeSlotsCount }}</span>
+        }
+      </div>
     </div>
 
-    <div *ngIf="!loading && periods.length === 0" class="empty-state">
-      <h3>Свободных окон пока нет</h3>
-      <p>
-        Секретарь ещё не открыл запись или все места уже заняты.
-        Попробуйте проверить страницу позднее.
-      </p>
+    <div class="legend">
+      <span><i class="dot free"></i>свободно</span>
+      <span><i class="dot busy"></i>занято</span>
+      <span><i class="dot past"></i>недоступно</span>
     </div>
+
+    @if (loading) {
+      <div class="loading-state">Загружаем календарь...</div>
+    } @else if (!hasSlots) {
+      <div class="empty-state">
+        <h3>На этой неделе приёма нет</h3>
+        <p>
+          Секретарь ещё не открыл запись на эти даты. Переключитесь
+          на другую неделю или проверьте страницу позднее.
+        </p>
+      </div>
+    } @else {
+      <div class="week-grid">
+        @for (day of days; track trackByDay($index, day)) {
+          <div class="day-column">
+            <div class="day-title">{{ day.label }}</div>
+
+            @if (day.slots.length === 0) {
+              <div class="day-empty">нет приёма</div>
+            }
+
+            @for (slot of day.slots; track trackBySlot($index, slot)) {
+              <button
+                type="button"
+                class="slot"
+                [class.free]="isBookable(slot)"
+                [class.busy]="!slot.is_free && !slot.is_past"
+                [class.past]="slot.is_past"
+                [disabled]="!isBookable(slot)"
+                (click)="selectSlot(slot)"
+              >
+                {{ formatTime(slot.starts_at) }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
 
   </section>
+
+  @if (selectedSlot) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+
+        <h2>Запись на приём</h2>
+
+        <p class="modal-summary">
+          <strong>{{ formatDate(selectedSlot.starts_at) }}</strong>,
+          {{ formatTime(selectedSlot.starts_at) }}
+          –
+          {{ formatTime(selectedSlot.ends_at) }}
+          <br>
+          Декан: {{ selectedSlot.dean_name }}
+        </p>
+
+        <form (ngSubmit)="confirm()">
+          <label class="modal-field">
+            <span>Тема обращения</span>
+
+            <select name="topic" [(ngModel)]="topicValue" required>
+              <option value="" disabled>Выберите тему</option>
+
+              @for (topic of topics; track topic.id) {
+                <option [value]="topic.id">{{ topic.title }}</option>
+              }
+
+              <option value="other">Другое</option>
+            </select>
+          </label>
+
+          <label class="modal-field">
+            <span>Опишите ваш вопрос</span>
+
+            <textarea
+              name="question"
+              rows="4"
+              maxlength="1000"
+              [(ngModel)]="question"
+              placeholder="Кратко опишите, с чем вы обращаетесь"
+              required
+            ></textarea>
+          </label>
+
+          @if (modalError) {
+            <div class="message error">{{ modalError }}</div>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="book-button" [disabled]="saving">
+              {{ saving ? 'Записываем...' : 'Записаться' }}
+            </button>
+
+            <button
+              type="button"
+              class="link-button"
+              (click)="closeModal()"
+              [disabled]="saving"
+            >
+              Отмена
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  }
+
 </div>

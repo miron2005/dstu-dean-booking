@@ -132,7 +132,8 @@ export interface AppealTopicUpdate {
 
 export interface AppointmentCreate {
   period_id: number;
-  topic_id: number;
+  slot_start: string;
+  topic_id: number | null;
   question: string;
 }
 
