@@ -76,19 +76,34 @@ def get_queue(session, dean, period_id):
     return AppointmentRepository.get_queue(period_id, session)
 
 
+def call_appointment(session, appointment):
+    appointment.status = "called"
+    room = appointment.period.room
+    NotificationRepository.add(
+        appointment.id,
+        "called",
+        "Вас вызвали на приём" + (f", аудитория {room}" if room else ""),
+        session,
+    )
+    return AppointmentRepository.add_one(appointment, session)
+
+
 def call_next(session, dean, period_id):
     get_dean_period(session, dean, period_id)
     appointment = AppointmentRepository.get_first_active(period_id, session)
     if appointment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Очередь пуста")
-    appointment.status = "called"
-    NotificationRepository.add(
-        appointment.id,
-        "called",
-        f"Вызван ваш номер {appointment.queue_number}",
-        session,
-    )
-    return AppointmentRepository.add_one(appointment, session)
+    return call_appointment(session, appointment)
+
+
+def call_student(session, dean, appointment_id):
+    appointment = AppointmentRepository.get_one(appointment_id, session, for_update=True)
+    if appointment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+    get_dean_period(session, dean, appointment.period_id)
+    if appointment.status != "active":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Вызвать можно только студента, который ожидает приёма")
+    return call_appointment(session, appointment)
 
 
 def set_result(session, dean, appointment_id, data):

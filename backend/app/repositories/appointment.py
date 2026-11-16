@@ -6,7 +6,10 @@ from app.models import Appointment, ReceptionPeriod
 
 class AppointmentRepository:
     @classmethod
-    def get_one(cls, appointment_id: int, session: Session):
+    def get_one(cls, appointment_id: int, session: Session, for_update: bool = False):
+        if for_update:
+            query = select(Appointment).where(Appointment.id == appointment_id).with_for_update()
+            return session.scalar(query)
         return session.get(Appointment, appointment_id)
 
     @classmethod

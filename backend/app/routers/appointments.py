@@ -86,6 +86,15 @@ def call_next(
     return to_queue_item(service.call_next(session, user, period_id))
 
 
+@router.post("/appointments/{appointment_id}/call", response_model=SQueueItem)
+def call_student(
+    appointment_id: int,
+    user: Annotated[User, Depends(require_role("dean"))],
+    session: SessionDep,
+):
+    return to_queue_item(service.call_student(session, user, appointment_id))
+
+
 @router.patch("/appointments/{appointment_id}/result", response_model=SQueueItem)
 def set_result(
     appointment_id: int,
