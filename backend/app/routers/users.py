@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.deps import SessionDep, require_role
+from app.models import User
 from app.repositories import FacultyRepository, UserRepository
 from app.schemas.user import SUser, SUserAdd, SUserPatch
 from app.security import hash_password
@@ -45,3 +48,16 @@ def update_user(user_id: int, data: SUserPatch, session: SessionDep):
     changes = data.model_dump(exclude_unset=True)
     check_faculty(session, changes.get("role", user.role), changes.get("faculty_id", user.faculty_id))
     return UserRepository.update_one(user, changes, session)
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, admin: Annotated[User, Depends(require_role("admin"))], session: SessionDep):
+    user = UserRepository.get_one(user_id, session)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Пользователь не найден")
+    if user.id == admin.id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Нельзя удалить самого себя")
+    if user.role == "admin":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Нельзя удалить администратора")
+    UserRepository.delete_with_data(user, session)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

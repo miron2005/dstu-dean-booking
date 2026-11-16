@@ -1,7 +1,7 @@
-from sqlalchemy import select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import User
+from app.models import Appointment, Notification, ReceptionPeriod, User
 
 
 class UserRepository:
@@ -39,3 +39,15 @@ class UserRepository:
         session.commit()
         session.refresh(user)
         return user
+
+    @classmethod
+    def delete_with_data(cls, user: User, session: Session):
+        period_ids = select(ReceptionPeriod.id).where(ReceptionPeriod.dean_id == user.id)
+        appointment_ids = select(Appointment.id).where(
+            or_(Appointment.student_id == user.id, Appointment.period_id.in_(period_ids))
+        )
+        session.execute(delete(Notification).where(Notification.appointment_id.in_(appointment_ids)))
+        session.execute(delete(Appointment).where(Appointment.id.in_(appointment_ids)))
+        session.execute(delete(ReceptionPeriod).where(ReceptionPeriod.dean_id == user.id))
+        session.delete(user)
+        session.commit()
