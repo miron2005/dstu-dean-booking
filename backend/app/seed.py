@@ -58,7 +58,9 @@ with new_session() as db:
                         dean_id=dean.id,
                         starts_at=start + timedelta(days=days),
                         ends_at=start + timedelta(days=days, hours=3),
-                        capacity=10,
+                        capacity=12,
+                        slot_minutes=15,
+                        room="101",
                     )
                 )
 
