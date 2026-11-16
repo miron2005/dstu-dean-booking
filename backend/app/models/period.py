@@ -12,6 +12,7 @@ class ReceptionPeriod(Model):
         CheckConstraint("capacity > 0", name="ck_period_capacity"),
         CheckConstraint("next_queue_number > 0", name="ck_period_next_number"),
         CheckConstraint("starts_at < ends_at", name="ck_period_time"),
+        CheckConstraint("slot_minutes > 0", name="ck_period_slot"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -20,6 +21,7 @@ class ReceptionPeriod(Model):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     capacity: Mapped[int] = mapped_column(Integer)
+    slot_minutes: Mapped[int] = mapped_column(Integer, default=15, server_default="15")
     next_queue_number: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(16), default="open")
 
