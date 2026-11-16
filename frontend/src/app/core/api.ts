@@ -456,6 +456,14 @@ export class ApiService {
     );
   }
 
+  markNotificationRead(notificationId: number): Observable<StudentNotification> {
+    return this.http.post<StudentNotification>(
+      `${this.baseUrl}/notifications/${notificationId}/read`,
+      {},
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getNotifications(): Observable<StudentNotification[]> {
     return this.http.get<StudentNotification[]>(
       `${this.baseUrl}/notifications`,

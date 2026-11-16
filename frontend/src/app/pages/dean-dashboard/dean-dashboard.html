@@ -195,13 +195,24 @@
           </p>
         </div>
 
-        <button
-          class="primary-button"
-          (click)="callNext()"
-          [disabled]="!selectedPeriod || actionLoading || activeCount === 0"
-        >
-          {{ actionLoading ? 'Подождите...' : 'Вызвать следующего' }}
-        </button>
+        <div class="queue-actions">
+          <button
+            class="danger-outline-button"
+            *ngIf="canCancelReception"
+            (click)="cancelReception()"
+            [disabled]="actionLoading"
+          >
+            Отменить весь приём
+          </button>
+
+          <button
+            class="primary-button"
+            (click)="callNext()"
+            [disabled]="!selectedPeriod || actionLoading || activeCount === 0"
+          >
+            {{ actionLoading ? 'Подождите...' : 'Вызвать следующего' }}
+          </button>
+        </div>
       </div>
 
       <div class="loading" *ngIf="queueLoading">

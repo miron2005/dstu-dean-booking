@@ -9,16 +9,29 @@ import {
   inject,
 } from '@angular/core';
 
-import { ApiService, StudentAppointment } from '../core/api';
+import { RouterLink } from '@angular/router';
+
+import {
+  ApiService,
+  StudentAppointment,
+  StudentNotification,
+} from '../core/api';
+
+interface CancelAlert {
+  notification: StudentNotification;
+  appointment: StudentAppointment | undefined;
+}
 
 const POLL_INTERVAL_MS = 3000;
 const DISMISSED_KEY = 'dismissed_call_alerts';
+const DISMISSED_CANCEL_KEY = 'dismissed_cancel_alerts';
 const TITLE_ALERT = 'Вас вызвали! — ДГТУ';
+const TITLE_CANCEL = 'Приём отменён — ДГТУ';
 
 @Component({
   selector: 'app-call-alert',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   template: `
     @for (call of calls; track call.id) {
       <div class="call-overlay" role="alertdialog" aria-modal="true">
@@ -59,6 +72,59 @@ const TITLE_ALERT = 'Вас вызвали! — ДГТУ';
 
           <button type="button" class="call-button" (click)="dismiss(call)">
             Понятно, иду
+          </button>
+        </div>
+      </div>
+    }
+
+    @for (item of cancels; track item.notification.id) {
+      <div class="call-overlay" role="alertdialog" aria-modal="true">
+        <div class="call-card cancel-card">
+          <div class="call-pulse cancel-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="17" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+              <path d="m9.5 14.5 5 5M14.5 14.5l-5 5" />
+            </svg>
+          </div>
+
+          <h2>Приём отменён</h2>
+
+          <p class="call-lead">{{ item.notification.message }}</p>
+
+          @if (item.appointment; as appointment) {
+            <dl class="call-details">
+              <div>
+                <dt>Декан</dt>
+                <dd>{{ appointment.dean_name }}</dd>
+              </div>
+
+              @if (appointment.slot_start) {
+                <div>
+                  <dt>Дата и время</dt>
+                  <dd>{{ appointment.slot_start | date: 'dd.MM.yyyy, HH:mm' }}</dd>
+                </div>
+              }
+
+              <div>
+                <dt>Аудитория</dt>
+                <dd>{{ appointment.room || 'не указана' }}</dd>
+              </div>
+            </dl>
+          }
+
+          <button
+            type="button"
+            class="call-button"
+            routerLink="/student/new-appointment"
+            (click)="dismissCancel(item)"
+          >
+            Выбрать другое время
+          </button>
+
+          <button type="button" class="call-link" (click)="dismissCancel(item)">
+            Закрыть
           </button>
         </div>
       </div>
@@ -161,6 +227,28 @@ const TITLE_ALERT = 'Вас вызвали! — ДГТУ';
     .call-button:hover {
       background: #a3813f;
     }
+
+    .cancel-card {
+      border-top-color: #9b2c2c;
+    }
+
+    .cancel-icon {
+      background: #f3e8e8;
+      color: #9b2c2c;
+      animation: none;
+    }
+
+    .call-link {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      background: none;
+      color: #6b7280;
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   `],
 })
 export class CallAlert implements OnInit, OnDestroy {
@@ -170,11 +258,14 @@ export class CallAlert implements OnInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   calls: StudentAppointment[] = [];
+  cancels: CancelAlert[] = [];
 
   private timer: ReturnType<typeof setInterval> | null = null;
   private lastSignature: string | null = null;
   private lastAppointments: StudentAppointment[] = [];
-  private dismissed = this.readDismissed();
+  private dismissed = this.readDismissed(DISMISSED_KEY);
+  private dismissedCancels = this.readDismissed(DISMISSED_CANCEL_KEY);
+  private notifications: StudentNotification[] = [];
   private originalTitle = document.title;
 
   ngOnInit(): void {
@@ -196,9 +287,22 @@ export class CallAlert implements OnInit, OnDestroy {
 
   dismiss(call: StudentAppointment): void {
     this.dismissed.add(call.id);
-    this.saveDismissed();
+    this.saveDismissed(DISMISSED_KEY, this.dismissed);
     this.refreshCalls();
     this.cdr.detectChanges();
+  }
+
+  dismissCancel(item: CancelAlert): void {
+    this.dismissedCancels.add(item.notification.id);
+    this.saveDismissed(DISMISSED_CANCEL_KEY, this.dismissedCancels);
+    this.refreshCalls();
+    this.cdr.detectChanges();
+
+    this.api.markNotificationRead(item.notification.id).subscribe({
+      error: () => {
+        /* не критично: окно уже закрыто и больше не покажется в этой сессии */
+      },
+    });
   }
 
   private poll(): void {
@@ -219,6 +323,8 @@ export class CallAlert implements OnInit, OnDestroy {
         if (isChange) {
           this.changed.emit(appointments);
         }
+
+        this.pollCancellations();
       },
       error: (error) => {
         if (error.status === 401 && this.timer !== null) {
@@ -229,19 +335,51 @@ export class CallAlert implements OnInit, OnDestroy {
     });
   }
 
+  private pollCancellations(): void {
+    this.api.getNotifications().subscribe({
+      next: (notifications) => {
+        this.notifications = notifications;
+        this.refreshCalls();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        /* повторим при следующем опросе */
+      },
+    });
+  }
+
   private refreshCalls(): void {
     this.calls = this.lastAppointments.filter(
       (appointment) =>
         appointment.status === 'called' && !this.dismissed.has(appointment.id),
     );
 
-    document.title = this.calls.length > 0 ? TITLE_ALERT : this.originalTitle;
+    this.cancels = this.notifications
+      .filter(
+        (notification) =>
+          notification.kind === 'period_cancelled' &&
+          notification.read_at === null &&
+          !this.dismissedCancels.has(notification.id),
+      )
+      .map((notification) => ({
+        notification,
+        appointment: this.lastAppointments.find(
+          (appointment) => appointment.id === notification.appointment_id,
+        ),
+      }));
+
+    document.title =
+      this.calls.length > 0
+        ? TITLE_ALERT
+        : this.cancels.length > 0
+          ? TITLE_CANCEL
+          : this.originalTitle;
   }
 
-  private readDismissed(): Set<number> {
+  private readDismissed(key: string): Set<number> {
     try {
       const parsed: unknown = JSON.parse(
-        sessionStorage.getItem(DISMISSED_KEY) ?? '[]',
+        sessionStorage.getItem(key) ?? '[]',
       );
 
       return new Set(
@@ -254,9 +392,9 @@ export class CallAlert implements OnInit, OnDestroy {
     }
   }
 
-  private saveDismissed(): void {
+  private saveDismissed(key: string, ids: Set<number>): void {
     try {
-      sessionStorage.setItem(DISMISSED_KEY, JSON.stringify([...this.dismissed]));
+      sessionStorage.setItem(key, JSON.stringify([...ids]));
     } catch {
       /* хранилище недоступно, окно просто покажется снова */
     }

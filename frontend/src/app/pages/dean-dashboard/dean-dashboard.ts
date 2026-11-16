@@ -218,6 +218,62 @@ export class DeanDashboard implements OnInit {
     });
   }
 
+  get canCancelReception(): boolean {
+    return (
+      this.isUpcoming &&
+      this.selectedPeriod !== null &&
+      this.selectedPeriod.status === 'open'
+    );
+  }
+
+  cancelReception(): void {
+    const period = this.selectedPeriod;
+
+    if (!period || this.actionLoading) {
+      return;
+    }
+
+    const waiting = this.queue.filter(
+      (item) => item.status === 'active' || item.status === 'called',
+    ).length;
+
+    const confirmed = window.confirm(
+      'Отменить весь приём? Записи всех студентов будут отменены, ' +
+      `студентам (${waiting}) сразу придёт уведомление. Действие необратимо.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.api.cancelPeriod(period.id).subscribe({
+      next: () => {
+        this.actionLoading = false;
+        this.successMessage =
+          `Приём отменён. Записей отменено: ${waiting}, студенты уведомлены.`;
+        this.selectedPeriod = null;
+        this.selectedAppointment = null;
+        this.queue = [];
+        this.loadPeriods();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.actionLoading = false;
+
+        this.errorMessage =
+          typeof error.error?.detail === 'string'
+            ? error.error.detail
+            : 'Не удалось отменить приём.';
+
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   callStudent(appointment: QueueItem): void {
     if (!this.selectedPeriod || this.actionLoading) {
       return;

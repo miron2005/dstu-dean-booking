@@ -813,3 +813,32 @@
   flex-shrink: 0;
   object-fit: contain;
 }
+
+.queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.danger-outline-button {
+  padding: 12px 18px;
+  border: 1px solid #c53030;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #9b2c2c;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.danger-outline-button:hover:not(:disabled) {
+  background: #9b2c2c;
+  color: #ffffff;
+}
+
+.danger-outline-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
