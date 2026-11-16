@@ -1,12 +1,12 @@
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, Field
 
 
 class SAppointmentBase(BaseModel):
     period_id: int
-    topic_id: int
-    question: str
+    topic_id: int | None = None
+    question: str = Field(min_length=1)
 
 
 class SAppointmentAdd(SAppointmentBase):

@@ -25,9 +25,10 @@ def create_appointment(session, student, data):
     if data.slot_start in AppointmentRepository.get_taken_starts(period.id, session):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Это время уже занято")
 
-    topic = TopicRepository.get_one(data.topic_id, session)
-    if topic is None or topic.faculty_id != period.faculty_id or not topic.is_active:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Тема не найдена")
+    if data.topic_id is not None:
+        topic = TopicRepository.get_one(data.topic_id, session)
+        if topic is None or topic.faculty_id != period.faculty_id or not topic.is_active:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Тема не найдена")
 
     if AppointmentRepository.student_has_active(period.id, student.id, session):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Вы уже записаны на этот период")
@@ -35,7 +36,7 @@ def create_appointment(session, student, data):
     appointment = Appointment(
         period_id=period.id,
         student_id=student.id,
-        topic_id=topic.id,
+        topic_id=data.topic_id,
         question=data.question,
         queue_number=period.next_queue_number,
         slot_start=data.slot_start,
