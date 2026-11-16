@@ -108,6 +108,7 @@ export class AdminDashboard implements OnInit {
         this.api.getFaculties().subscribe({
           next: faculties => {
             this.faculties = faculties;
+            this.users = this.sortUsers(this.users);
             this.loading = false;
 
             this.cdr.detectChanges();
@@ -132,6 +133,55 @@ export class AdminDashboard implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       },
+    });
+  }
+
+  private sortUsers(users: User[]): User[] {
+    const collator = new Intl.Collator('ru');
+
+    const roleGroup = (role: string): number =>
+      role === 'admin' ? 0 : role === 'student' ? 2 : 1;
+
+    const staffOrder = (role: string): number => (role === 'dean' ? 0 : 1);
+
+    return [...users].sort((a, b) => {
+      const groupDiff = roleGroup(a.role) - roleGroup(b.role);
+
+      if (groupDiff !== 0) {
+        return groupDiff;
+      }
+
+      if (a.role !== 'admin') {
+        const facultyDiff = collator.compare(
+          this.getFacultyName(a.faculty_id),
+          this.getFacultyName(b.faculty_id),
+        );
+
+        if (facultyDiff !== 0) {
+          return facultyDiff;
+        }
+      }
+
+      if (roleGroup(a.role) === 1) {
+        const staffDiff = staffOrder(a.role) - staffOrder(b.role);
+
+        if (staffDiff !== 0) {
+          return staffDiff;
+        }
+      }
+
+      if (a.role === 'student') {
+        const groupName = collator.compare(
+          a.group_name ?? '',
+          b.group_name ?? '',
+        );
+
+        if (groupName !== 0) {
+          return groupName;
+        }
+      }
+
+      return collator.compare(a.full_name, b.full_name);
     });
   }
 
