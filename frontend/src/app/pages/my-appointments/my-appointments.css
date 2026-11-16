@@ -435,3 +435,30 @@
     padding: 8px 10px;
   }
 }
+
+.empty-note {
+  padding: 28px 8px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.empty-note a {
+  margin-left: 6px;
+  color: #8a6a2f;
+}
+
+.message {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.message.error {
+  background: #fdecea;
+  color: #b42318;
+}
+
+.message.success {
+  background: #e8f5ec;
+  color: #1e6b3a;
+}

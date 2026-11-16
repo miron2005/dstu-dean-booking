@@ -14,11 +14,13 @@
       <a routerLink="/student">Главная</a>
       <a routerLink="/student/my-appointments" class="active">Мои записи</a>
       <a routerLink="/student/new-appointment">Записаться на приём</a>
-      <a href="javascript:void(0)">Уведомления</a>
-      <a href="javascript:void(0)">Мой профиль</a>
     </nav>
 
-    <a routerLink="/login" class="logout">Выйти</a>
+    <a
+      href="/login"
+      class="logout"
+      (click)="$event.preventDefault(); logout()"
+    >Выйти</a>
   </aside>
 
   <main class="main-content">
@@ -29,10 +31,12 @@
         <h1>Мои записи</h1>
       </div>
       <div class="user-info">
-        <div class="avatar">ИП</div>
+        <div class="avatar">
+          <app-role-avatar role="student" />
+        </div>
         <div>
-          <strong>Иван Петров</strong>
-          <span>Студент</span>
+          <strong>{{ user?.full_name || 'Студент' }}</strong>
+          <span>Студент{{ user?.group_name ? ', группа ' + user?.group_name : '' }}</span>
         </div>
       </div>
     </header>
@@ -47,22 +51,30 @@
       </a>
     </section>
 
+    @if (errorMessage) {
+      <div class="message error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="message success">{{ successMessage }}</div>
+    }
+
     <section class="stats">
       <div class="stat-card">
         <span>Всего записей</span>
-        <strong>5</strong>
+        <strong>{{ appointments.length }}</strong>
       </div>
       <div class="stat-card">
         <span>Предстоящие</span>
-        <strong>2</strong>
+        <strong>{{ upcoming.length }}</strong>
       </div>
       <div class="stat-card">
         <span>Завершённые</span>
-        <strong>2</strong>
+        <strong>{{ done.length }}</strong>
       </div>
       <div class="stat-card">
         <span>Отменённые</span>
-        <strong>1</strong>
+        <strong>{{ cancelled.length }}</strong>
       </div>
     </section>
 
@@ -75,91 +87,81 @@
       </div>
 
       <div class="filters">
-        <button class="filter active">Все записи</button>
-        <button class="filter">Предстоящие</button>
-        <button class="filter">Завершённые</button>
-        <button class="filter">Отменённые</button>
+        <button
+          type="button"
+          class="filter"
+          [class.active]="filter === 'all'"
+          (click)="setFilter('all')"
+        >Все записи</button>
+        <button
+          type="button"
+          class="filter"
+          [class.active]="filter === 'upcoming'"
+          (click)="setFilter('upcoming')"
+        >Предстоящие</button>
+        <button
+          type="button"
+          class="filter"
+          [class.active]="filter === 'done'"
+          (click)="setFilter('done')"
+        >Завершённые</button>
+        <button
+          type="button"
+          class="filter"
+          [class.active]="filter === 'cancelled'"
+          (click)="setFilter('cancelled')"
+        >Отменённые</button>
       </div>
 
-      <div class="appointment-list">
+      @if (loading) {
+        <div class="empty-note">Загружаем записи...</div>
+      } @else if (visibleAppointments.length === 0) {
+        <div class="empty-note">
+          В этом разделе записей пока нет.
+          <a routerLink="/student/new-appointment">Записаться на приём</a>
+        </div>
+      } @else {
+        <div class="appointment-list">
+          @for (appointment of visibleAppointments; track trackById($index, appointment)) {
+            <article class="appointment">
+              <div class="date-block">
+                <strong>{{ getDay(appointment) }}</strong>
+                <span>{{ getMonth(appointment) }}</span>
+              </div>
 
-        <article class="appointment">
-          <div class="date-block">
-            <strong>12</strong>
-            <span>ноября</span>
-          </div>
-          <div class="appointment-info">
-            <h3>Вопрос по учебному плану</h3>
-            <p>Деканат факультета информационных технологий</p>
-            <div class="appointment-meta">
-              <span>10:30</span>
-              <span>Личный приём</span>
-            </div>
-          </div>
-          <div class="appointment-actions">
-            <span class="status pending">Ожидает приёма</span>
-            <button class="details-button">Подробнее</button>
-          </div>
-        </article>
+              <div class="appointment-info">
+                <h3>{{ getTopicTitle(appointment) }}</h3>
+                @if (appointment.question) {
+                  <p>{{ appointment.question }}</p>
+                }
+                <div class="appointment-meta">
+                  <span>{{ getTime(appointment) }}</span>
+                  @if (user?.dean_name) {
+                    <span>Декан: {{ user?.dean_name }}</span>
+                  }
+                </div>
+              </div>
 
-        <article class="appointment">
-          <div class="date-block">
-            <strong>15</strong>
-            <span>ноября</span>
-          </div>
-          <div class="appointment-info">
-            <h3>Академическая задолженность</h3>
-            <p>Деканат факультета информационных технологий</p>
-            <div class="appointment-meta">
-              <span>14:00</span>
-              <span>Личный приём</span>
-            </div>
-          </div>
-          <div class="appointment-actions">
-            <span class="status confirmed">Подтверждена</span>
-            <button class="details-button">Подробнее</button>
-          </div>
-        </article>
+              <div class="appointment-actions">
+                <span class="status" [class]="'status ' + getStatusClass(appointment.status)">
+                  {{ getStatusLabel(appointment.status) }}
+                </span>
 
-        <article class="appointment">
-          <div class="date-block">
-            <strong>28</strong>
-            <span>октября</span>
-          </div>
-          <div class="appointment-info">
-            <h3>Получение справки</h3>
-            <p>Деканат факультета информационных технологий</p>
-            <div class="appointment-meta">
-              <span>11:00</span>
-              <span>Личный приём</span>
-            </div>
-          </div>
-          <div class="appointment-actions">
-            <span class="status completed">Завершена</span>
-            <button class="details-button">Подробнее</button>
-          </div>
-        </article>
-
-        <article class="appointment">
-          <div class="date-block">
-            <strong>20</strong>
-            <span>октября</span>
-          </div>
-          <div class="appointment-info">
-            <h3>Перевод на другую форму обучения</h3>
-            <p>Деканат факультета информационных технологий</p>
-            <div class="appointment-meta">
-              <span>12:30</span>
-              <span>Личный приём</span>
-            </div>
-          </div>
-          <div class="appointment-actions">
-            <span class="status cancelled">Отменена</span>
-            <button class="details-button">Подробнее</button>
-          </div>
-        </article>
-
-      </div>
+                @if (canCancel(appointment)) {
+                  <button
+                    type="button"
+                    class="details-button"
+                    [disabled]="cancellingId === appointment.id"
+                    (click)="cancel(appointment)"
+                  >
+                    {{ cancellingId === appointment.id ? 'Отмена...' : 'Отменить' }}
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
     </section>
 
     <footer class="footer">
@@ -168,4 +170,3 @@
 
   </main>
 </div>
-

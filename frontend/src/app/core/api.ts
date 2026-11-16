@@ -418,6 +418,14 @@ export class ApiService {
     );
   }
 
+  cancelAppointment(appointmentId: number): Observable<StudentAppointment> {
+    return this.http.post<StudentAppointment>(
+      `${this.baseUrl}/appointments/${appointmentId}/cancel`,
+      {},
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getMyAppointments(): Observable<StudentAppointment[]> {
     return this.http.get<StudentAppointment[]>(
       `${this.baseUrl}/appointments/my`,
