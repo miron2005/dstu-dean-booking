@@ -39,27 +39,19 @@
         </p>
       </div>
 
-      <div class="service-grid">
-        <article class="service-tile">
-          <h3>Войдите или зарегистрируйтесь</h3>
-          <p>
-            Создайте аккаунт студента и войдите в личный кабинет.
-          </p>
-        </article>
+      <div class="hero-actions">
+        <a
+          class="cta-button"
+          [routerLink]="isLoggedIn ? '/student/new-appointment' : '/login'"
+        >
+          Записаться на приём
+        </a>
 
-        <article class="service-tile">
-          <h3>Выберите тему и время</h3>
-          <p>
-            Укажите тему обращения и свободное окно в календаре.
-          </p>
-        </article>
-
-        <article class="service-tile">
-          <h3>Приходите к назначенному времени</h3>
-          <p>
-            Запись появится в «Моих записях», вызов придёт уведомлением.
-          </p>
-        </article>
+        @if (!isLoggedIn) {
+          <a class="cta-secondary" routerLink="/register">
+            Зарегистрироваться
+          </a>
+        }
       </div>
     </div>
   </section>
