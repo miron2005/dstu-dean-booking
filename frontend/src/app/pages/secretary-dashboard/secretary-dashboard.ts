@@ -1,9 +1,14 @@
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService, ReceptionPeriod, User, Dean } from '../../core/api';
+import {
+  ApiService,
+  AppealTopic,
+  PeriodScope,
+  ReceptionPeriod,
+  User,
+} from '../../core/api';
 import { RoleAvatar } from '../../shared/role-avatar';
 
 @Component({
@@ -16,23 +21,34 @@ import { RoleAvatar } from '../../shared/role-avatar';
 export class SecretaryDashboard implements OnInit {
   user: User | null = null;
   periods: ReceptionPeriod[] = [];
-  deans: Dean[] = [];
+  topics: AppealTopic[] = [];
+
+  readonly slotOptions = [10, 15, 20, 30];
+
+  scope: PeriodScope = 'upcoming';
 
   loading = false;
-  loadingDeans = false;
+  loadingTopics = false;
   saving = false;
+  savingTopic = false;
 
   errorMessage = '';
   successMessage = '';
-  deansErrorMessage = '';
+  topicError = '';
+  topicSuccess = '';
 
   editingId: number | null = null;
+  editingTopicId: number | null = null;
 
   form = {
-    dean_id: 0,
     starts_at: '',
     ends_at: '',
-    capacity: 10,
+    slot_minutes: 15,
+  };
+
+  topicForm = {
+    title: '',
+    description: '',
   };
 
   constructor(
@@ -57,8 +73,8 @@ export class SecretaryDashboard implements OnInit {
         this.user = user;
         this.cdr.detectChanges();
 
-        this.loadDeans();
         this.loadPeriods();
+        this.loadTopics();
       },
       error: () => {
         this.api.logout();
@@ -67,28 +83,12 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  get visiblePeriods(): ReceptionPeriod[] {
-    const currentTime = Date.now();
-
-    return this.periods.filter((period) => {
-      const endTime = new Date(period.ends_at).getTime();
-
-      return Number.isFinite(endTime) && endTime > currentTime;
-    });
+  get isUpcoming(): boolean {
+    return this.scope === 'upcoming';
   }
 
   get activePeriodsCount(): number {
-    const currentTime = Date.now();
-
-    return this.periods.filter((period) => {
-      const endTime = new Date(period.ends_at).getTime();
-
-      return (
-        period.status === 'open' &&
-        Number.isFinite(endTime) &&
-        endTime > currentTime
-      );
-    }).length;
+    return this.periods.filter((period) => period.status === 'open').length;
   }
 
   get cancelledPeriodsCount(): number {
@@ -98,43 +98,30 @@ export class SecretaryDashboard implements OnInit {
   }
 
   get freePlacesCount(): number {
-    return this.visiblePeriods.reduce(
-      (sum, period) => sum + Number(period.free_places || 0),
-      0,
-    );
+    return this.periods
+      .filter((period) => period.status === 'open')
+      .reduce((sum, period) => sum + Number(period.free_places || 0), 0);
   }
 
-  loadDeans(): void {
-    this.loadingDeans = true;
-    this.deansErrorMessage = '';
-    this.cdr.detectChanges();
+  get slotsPreview(): number {
+    const start = new Date(this.form.starts_at).getTime();
+    const end = new Date(this.form.ends_at).getTime();
+    const minutes = Number(this.form.slot_minutes);
 
-    this.api.getDeans().subscribe({
-      next: (deans) => {
-        this.deans = deans;
-        this.loadingDeans = false;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.deansErrorMessage =
-          error.error?.detail || 'Не удалось загрузить список деканов';
-
-        this.loadingDeans = false;
-        this.cdr.detectChanges();
-      },
-    });
-  }
-
-  getDeanName(period: ReceptionPeriod): string {
-    if (period.dean_name) {
-      return period.dean_name;
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      return 0;
     }
 
-    const dean = this.deans.find(
-      (item) => item.id === period.dean_id,
-    );
+    return Math.floor((end - start) / (minutes * 60000));
+  }
 
-    return dean?.full_name || 'Неизвестный декан';
+  setScope(scope: PeriodScope): void {
+    if (this.scope === scope) {
+      return;
+    }
+
+    this.scope = scope;
+    this.loadPeriods();
   }
 
   loadPeriods(): void {
@@ -142,7 +129,7 @@ export class SecretaryDashboard implements OnInit {
     this.errorMessage = '';
     this.cdr.detectChanges();
 
-    this.api.getPeriods().subscribe({
+    this.api.getPeriods(this.scope).subscribe({
       next: (periods) => {
         this.periods = periods;
         this.loading = false;
@@ -162,14 +149,8 @@ export class SecretaryDashboard implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (
-      !this.form.dean_id ||
-      !this.form.starts_at ||
-      !this.form.ends_at ||
-      !Number.isInteger(Number(this.form.capacity)) ||
-      Number(this.form.capacity) < 1
-    ) {
-      this.errorMessage = 'Заполните все поля корректно';
+    if (!this.form.starts_at || !this.form.ends_at) {
+      this.errorMessage = 'Укажите начало и окончание приёма';
       return;
     }
 
@@ -189,11 +170,15 @@ export class SecretaryDashboard implements OnInit {
       return;
     }
 
+    if (this.slotsPreview < 1) {
+      this.errorMessage = 'В этом интервале не помещается ни одного окна';
+      return;
+    }
+
     const data = {
-      dean_id: Number(this.form.dean_id),
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
-      capacity: Number(this.form.capacity),
+      slot_minutes: Number(this.form.slot_minutes),
     };
 
     this.saving = true;
@@ -219,7 +204,9 @@ export class SecretaryDashboard implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error.error?.detail || 'Не удалось сохранить период приёма';
+          typeof error.error?.detail === 'string'
+            ? error.error.detail
+            : 'Не удалось сохранить период приёма';
 
         this.saving = false;
         this.cdr.detectChanges();
@@ -230,25 +217,10 @@ export class SecretaryDashboard implements OnInit {
   editPeriod(period: ReceptionPeriod): void {
     this.editingId = period.id;
 
-    const existingDean = this.deans.find(
-      (dean) => dean.id === period.dean_id,
-    );
-
-    if (!existingDean && period.dean_name) {
-      this.deans = [
-        ...this.deans,
-        {
-          id: period.dean_id,
-          full_name: period.dean_name,
-        },
-      ];
-    }
-
     this.form = {
-      dean_id: period.dean_id,
       starts_at: this.toLocalDateTime(period.starts_at),
       ends_at: this.toLocalDateTime(period.ends_at),
-      capacity: period.capacity,
+      slot_minutes: period.slot_minutes,
     };
 
     this.successMessage = '';
@@ -264,7 +236,7 @@ export class SecretaryDashboard implements OnInit {
 
   cancelPeriod(period: ReceptionPeriod): void {
     const confirmed = window.confirm(
-      'Вы действительно хотите отменить этот период приёма?',
+      'Вы действительно хотите отменить этот период приёма? Записи студентов будут отменены.',
     );
 
     if (!confirmed) {
@@ -293,11 +265,108 @@ export class SecretaryDashboard implements OnInit {
     this.editingId = null;
 
     this.form = {
-      dean_id: 0,
       starts_at: '',
       ends_at: '',
-      capacity: 10,
+      slot_minutes: 15,
     };
+  }
+
+  loadTopics(): void {
+    this.loadingTopics = true;
+    this.cdr.detectChanges();
+
+    this.api.getManagedTopics().subscribe({
+      next: (topics) => {
+        this.topics = topics;
+        this.loadingTopics = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.topicError =
+          error.error?.detail || 'Не удалось загрузить темы обращений';
+
+        this.loadingTopics = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  saveTopic(): void {
+    this.topicError = '';
+    this.topicSuccess = '';
+
+    const title = this.topicForm.title.trim();
+
+    if (!title) {
+      this.topicError = 'Укажите название темы';
+      return;
+    }
+
+    const data = {
+      title,
+      description: this.topicForm.description.trim() || null,
+    };
+
+    this.savingTopic = true;
+
+    const isEditing = this.editingTopicId !== null;
+
+    const request = isEditing
+      ? this.api.updateTopic(this.editingTopicId!, data)
+      : this.api.createTopic(data);
+
+    request.subscribe({
+      next: () => {
+        this.topicSuccess = isEditing ? 'Тема обновлена' : 'Тема добавлена';
+        this.resetTopicForm();
+        this.savingTopic = false;
+        this.loadTopics();
+      },
+      error: (error) => {
+        this.topicError =
+          typeof error.error?.detail === 'string'
+            ? error.error.detail
+            : 'Не удалось сохранить тему';
+
+        this.savingTopic = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  editTopic(topic: AppealTopic): void {
+    this.editingTopicId = topic.id;
+    this.topicForm = {
+      title: topic.title,
+      description: topic.description ?? '',
+    };
+    this.topicError = '';
+    this.topicSuccess = '';
+  }
+
+  toggleTopic(topic: AppealTopic): void {
+    this.topicError = '';
+    this.topicSuccess = '';
+
+    this.api.updateTopic(topic.id, { is_active: !topic.is_active }).subscribe({
+      next: () => {
+        this.topicSuccess = topic.is_active
+          ? 'Тема отключена'
+          : 'Тема снова доступна студентам';
+        this.loadTopics();
+      },
+      error: (error) => {
+        this.topicError =
+          error.error?.detail || 'Не удалось изменить тему';
+
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  resetTopicForm(): void {
+    this.editingTopicId = null;
+    this.topicForm = { title: '', description: '' };
   }
 
   logout(): void {

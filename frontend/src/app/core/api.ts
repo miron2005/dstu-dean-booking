@@ -86,17 +86,15 @@ export interface ReceptionPeriod {
 export type PeriodScope = 'upcoming' | 'past' | 'all';
 
 export interface PeriodCreate {
-  dean_id: number;
   starts_at: string;
   ends_at: string;
-  capacity: number;
+  slot_minutes: number;
 }
 
 export interface PeriodUpdate {
   starts_at?: string;
   ends_at?: string;
-  capacity?: number;
-  status?: string;
+  slot_minutes?: number;
 }
 
 export interface Slot {
@@ -360,6 +358,13 @@ export class ApiService {
         headers: this.getAuthHeaders(),
         params: { faculty_id: facultyId },
       },
+    );
+  }
+
+  getManagedTopics(): Observable<AppealTopic[]> {
+    return this.http.get<AppealTopic[]>(
+      `${this.baseUrl}/topics/manage`,
+      { headers: this.getAuthHeaders() },
     );
   }
 
