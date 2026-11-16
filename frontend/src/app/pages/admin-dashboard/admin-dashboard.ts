@@ -39,6 +39,8 @@ export class AdminDashboard implements OnInit {
   loading = true;
   saving = false;
   error = '';
+  success = '';
+  currentUserId: number | null = null;
 
   showUserForm = false;
   showFacultyForm = false;
@@ -71,6 +73,7 @@ export class AdminDashboard implements OnInit {
           return;
         }
 
+        this.currentUserId = user.id;
         this.loadData();
       },
       error: () => {
@@ -258,6 +261,43 @@ export class AdminDashboard implements OnInit {
           err,
           'Не удалось изменить статус пользователя',
         );
+      },
+    });
+  }
+
+  canDeleteUser(user: User): boolean {
+    return user.role !== 'admin' && user.id !== this.currentUserId;
+  }
+
+  deleteUser(user: User): void {
+    if (!this.canDeleteUser(user)) {
+      return;
+    }
+
+    const confirmed = confirm(
+      `Удалить пользователя ${user.full_name} (${user.email}) навсегда?\n\n` +
+      'Будут удалены также его периоды приёма и записи студентов. ' +
+      'Действие необратимо.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+
+    this.api.deleteUser(user.id).subscribe({
+      next: () => {
+        this.success = `Пользователь ${user.full_name} удалён`;
+        this.loadData();
+      },
+      error: err => {
+        this.error = this.getErrorMessage(
+          err,
+          'Не удалось удалить пользователя',
+        );
+        this.cdr.detectChanges();
       },
     });
   }

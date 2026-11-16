@@ -61,6 +61,10 @@
       </div>
     </section>
 
+    <div class="message success-message" *ngIf="success">
+      {{ success }}
+    </div>
+
     <div class="message error-message" *ngIf="error">
       {{ error }}
     </div>
@@ -200,6 +204,12 @@
                     class="danger-button"
                     (click)="toggleUserStatus(user)">
                     {{ user.is_active ? 'Отключить' : 'Включить' }}
+                  </button>
+                  <button
+                    *ngIf="canDeleteUser(user)"
+                    class="danger-button"
+                    (click)="deleteUser(user)">
+                    Удалить
                   </button>
                 </div>
               </td>

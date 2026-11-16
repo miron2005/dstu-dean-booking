@@ -529,6 +529,12 @@ td small {
   color: #b64d4d;
 }
 
+.success-message {
+  border: 1px solid #cfe6d7;
+  background: #eef8f1;
+  color: #1e6b3a;
+}
+
 .empty-state {
   grid-column: 1 / -1;
   padding: 40px 20px;
