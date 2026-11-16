@@ -29,7 +29,6 @@
         #registerForm="ngForm"
         novalidate
       >
-
         <!-- ФИО -->
         <div class="form-group">
           <label for="full_name">ФИО</label>
@@ -83,8 +82,6 @@
             <span class="field-error">
               Введите корректный адрес электронной почты.
             </span>
-          } @else if (emailServerError) {
-            <span class="field-error">{{ emailServerError }}</span>
           }
         </div>
 
@@ -168,8 +165,11 @@
           }
         </div>
 
-        @if (errorMessage) {
-          <p class="form-error">{{ errorMessage }}</p>
+        <!-- Ошибки сервера -->
+        @if (errorMessage || emailServerError) {
+          <p class="form-error">
+            {{ emailServerError || errorMessage }}
+          </p>
         }
 
         <button
@@ -177,7 +177,7 @@
           class="submit-button"
           [disabled]="loading || loadingFaculties"
         >
-          {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
+          {{ loading ? 'Регистрация…' : 'Зарегистрироваться' }}
         </button>
       </form>
 
