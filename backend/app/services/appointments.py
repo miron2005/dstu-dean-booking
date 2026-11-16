@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 
 from app.models import Appointment
+from app.services import slots
 from app.repositories import (
     AppointmentRepository,
     NotificationRepository,
@@ -17,8 +18,12 @@ def create_appointment(session, student, data):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Период не найден")
     if period.status != "open":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Период отменён")
-    if datetime.now(timezone.utc) >= period.starts_at:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Запись возможна только до начала периода")
+    if data.slot_start not in slots.slot_grid(period):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "В этом периоде нет такого окна")
+    if data.slot_start < slots.booking_deadline():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "До начала окна слишком мало времени, выберите другое")
+    if data.slot_start in AppointmentRepository.get_taken_starts(period.id, session):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Это время уже занято")
 
     topic = TopicRepository.get_one(data.topic_id, session)
     if topic is None or topic.faculty_id != period.faculty_id or not topic.is_active:
@@ -26,8 +31,6 @@ def create_appointment(session, student, data):
 
     if AppointmentRepository.student_has_active(period.id, student.id, session):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Вы уже записаны на этот период")
-    if PeriodRepository.count_taken(period.id, session) >= period.capacity:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Свободных мест нет")
 
     appointment = Appointment(
         period_id=period.id,
@@ -35,6 +38,7 @@ def create_appointment(session, student, data):
         topic_id=topic.id,
         question=data.question,
         queue_number=period.next_queue_number,
+        slot_start=data.slot_start,
     )
     period.next_queue_number += 1
     return AppointmentRepository.add_one(appointment, session)
@@ -47,8 +51,8 @@ def cancel_appointment(session, student, appointment_id):
     period = PeriodRepository.get_one(appointment.period_id, session)
     if appointment.status != "active":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Запись нельзя отменить")
-    if datetime.now(timezone.utc) >= period.starts_at:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Период уже начался")
+    if datetime.now(timezone.utc) >= (appointment.slot_start or period.starts_at):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Время приёма уже наступило")
     appointment.status = "cancelled"
     return AppointmentRepository.add_one(appointment, session)
 

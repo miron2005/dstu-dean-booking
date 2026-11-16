@@ -10,7 +10,7 @@ class SAppointmentBase(BaseModel):
 
 
 class SAppointmentAdd(SAppointmentBase):
-    pass
+    slot_start: AwareDatetime
 
 
 class SAppointmentResult(BaseModel):
@@ -26,6 +26,7 @@ class SAppointmentStatus(BaseModel):
 class SAppointment(SAppointmentBase):
     id: int
     queue_number: int
+    slot_start: AwareDatetime | None
     status: str
     created_at: AwareDatetime
 
