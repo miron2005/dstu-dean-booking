@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import models
+from app.config import CORS_ORIGINS
 from app.database import Model, engine
 from app.routers import appointments, auth, deans, faculties, health, notifications, periods, slots, topics, users
 
@@ -18,7 +19,7 @@ app = FastAPI(title="Запись в деканат ДГТУ", lifespan=lifespan
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
