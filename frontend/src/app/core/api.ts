@@ -412,6 +412,14 @@ export class ApiService {
     );
   }
 
+  callAppointment(appointmentId: number): Observable<QueueItem> {
+    return this.http.post<QueueItem>(
+      `${this.baseUrl}/appointments/${appointmentId}/call`,
+      {},
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   setAppointmentResult(
     appointmentId: number,
     data: AppointmentResult,

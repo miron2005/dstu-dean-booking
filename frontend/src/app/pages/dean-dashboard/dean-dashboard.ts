@@ -218,6 +218,38 @@ export class DeanDashboard implements OnInit {
     });
   }
 
+  callStudent(appointment: QueueItem): void {
+    if (!this.selectedPeriod || this.actionLoading) {
+      return;
+    }
+
+    const periodId = this.selectedPeriod.id;
+
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.api.callAppointment(appointment.id).subscribe({
+      next: (called) => {
+        this.actionLoading = false;
+        this.successMessage = `Вызван студент: ${called.student_name}`;
+        this.loadQueue(periodId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.actionLoading = false;
+
+        this.errorMessage =
+          typeof error.error?.detail === 'string'
+            ? error.error.detail
+            : 'Не удалось вызвать студента.';
+
+        this.cdr.detectChanges();
+        this.loadQueue(periodId);
+      },
+    });
+  }
+
   chooseAppointment(appointment: QueueItem): void {
     this.selectedAppointment = appointment;
     this.resultComment = appointment.result_comment ?? '';

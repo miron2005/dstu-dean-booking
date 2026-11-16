@@ -237,6 +237,15 @@
 
           <button
             class="outline-button"
+            *ngIf="appointment.status === 'active'"
+            [disabled]="actionLoading"
+            (click)="callStudent(appointment)"
+          >
+            Вызвать
+          </button>
+
+          <button
+            class="outline-button"
             *ngIf="appointment.status === 'called'"
             (click)="chooseAppointment(appointment)"
           >
