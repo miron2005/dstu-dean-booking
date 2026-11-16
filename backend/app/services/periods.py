@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 
 from app.models import ReceptionPeriod
 from app.repositories import AppointmentRepository, NotificationRepository, PeriodRepository, UserRepository
-from app.config import SLOT_CHOICES
+from app.config import MAX_SLOT_MINUTES, MIN_SLOT_MINUTES
 from app.schemas.period import SPeriod
 from app.services import slots
 
@@ -47,8 +47,11 @@ def check_dean(session, dean_id, faculty_id):
 def check_time(starts_at, ends_at, slot_minutes):
     if starts_at >= ends_at:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Начало должно быть раньше окончания")
-    if slot_minutes not in SLOT_CHOICES:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Длительность окна: 10, 15, 20 или 30 минут")
+    if not MIN_SLOT_MINUTES <= slot_minutes <= MAX_SLOT_MINUTES:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Длительность окна должна быть от {MIN_SLOT_MINUTES} до {MAX_SLOT_MINUTES} минут",
+        )
     if slots.total_slots(starts_at, ends_at, slot_minutes) < 1:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "В интервале не помещается ни одного окна")
 
