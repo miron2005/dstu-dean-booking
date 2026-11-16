@@ -8,7 +8,14 @@ from app.models import Appointment, ReceptionPeriod
 
 class PeriodRepository:
     @classmethod
-    def get_all(cls, faculty_id: int, session: Session, day: date | None = None, dean_id: int | None = None):
+    def get_all(
+        cls,
+        faculty_id: int,
+        session: Session,
+        day: date | None = None,
+        dean_id: int | None = None,
+        scope: str = "all",
+    ):
         query = (
             select(ReceptionPeriod)
             .where(ReceptionPeriod.faculty_id == faculty_id)
@@ -17,6 +24,11 @@ class PeriodRepository:
         )
         if dean_id is not None:
             query = query.where(ReceptionPeriod.dean_id == dean_id)
+        now = datetime.now(timezone.utc)
+        if scope == "upcoming":
+            query = query.where(ReceptionPeriod.ends_at > now)
+        elif scope == "past":
+            query = query.where(ReceptionPeriod.ends_at <= now).order_by(None).order_by(ReceptionPeriod.starts_at.desc())
         if day is not None:
             start = datetime.combine(day, time.min, tzinfo=timezone.utc)
             query = query.where(
