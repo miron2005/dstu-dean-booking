@@ -76,6 +76,14 @@ class AppointmentRepository:
         return session.scalars(query).all()
 
     @classmethod
+    def get_open_by_period(cls, period_id: int, session: Session):
+        query = select(Appointment).where(
+            Appointment.period_id == period_id,
+            Appointment.status.in_(("active", "called")),
+        )
+        return session.scalars(query).all()
+
+    @classmethod
     def get_first_active(cls, period_id: int, session: Session):
         query = (
             select(Appointment)

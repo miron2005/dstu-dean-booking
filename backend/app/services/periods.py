@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException, status
 
 from app.models import ReceptionPeriod
@@ -115,20 +117,24 @@ def update_period(session, secretary, period_id, data):
     return PeriodRepository.add_one(period, session)
 
 
-def cancel_period(session, secretary, period_id):
+def cancel_period(session, user, period_id):
     period = PeriodRepository.get_one(period_id, session, for_update=True)
-    if period is None or period.faculty_id != secretary.faculty_id:
+    if period is None or period.faculty_id != user.faculty_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Период не найден")
+    if user.role == "dean" and period.dean_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Период не найден")
     if period.status == "cancelled":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Период уже отменён")
+    if period.ends_at <= datetime.now(timezone.utc):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Приём уже закончился")
 
+    message = (
+        "Декан отменил приём, ваша запись отменена"
+        if user.role == "dean"
+        else "Период приёма отменён, ваша запись отменена"
+    )
     period.status = "cancelled"
-    for appointment in AppointmentRepository.get_active_by_period(period.id, session):
+    for appointment in AppointmentRepository.get_open_by_period(period.id, session):
         appointment.status = "cancelled"
-        NotificationRepository.add(
-            appointment.id,
-            "period_cancelled",
-            "Период приёма отменён, ваша запись отменена",
-            session,
-        )
+        NotificationRepository.add(appointment.id, "period_cancelled", message, session)
     return PeriodRepository.add_one(period, session)

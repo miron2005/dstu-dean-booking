@@ -60,7 +60,7 @@ def update_period(
 @router.post("/{period_id}/cancel", response_model=SPeriod)
 def cancel_period(
     period_id: int,
-    user: Annotated[User, Depends(require_role("secretary"))],
+    user: Annotated[User, Depends(require_role("secretary", "dean"))],
     session: SessionDep,
 ):
     return service.to_out(session, service.cancel_period(session, user, period_id))
