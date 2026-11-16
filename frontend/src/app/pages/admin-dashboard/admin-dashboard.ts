@@ -151,8 +151,6 @@ export class AdminDashboard implements OnInit {
       || 'Не найден';
   }
 
-  // Пользователи
-
   editUser(user: User): void {
     this.editingUserId = user.id;
 
@@ -263,8 +261,6 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  // Факультеты
-
   editFaculty(faculty: Faculty): void {
     this.editingFacultyId = faculty.id;
 
@@ -353,8 +349,6 @@ export class AdminDashboard implements OnInit {
       },
     });
   }
-
-  // Общие методы
 
   private getErrorMessage(err: any, fallback: string): string {
     const detail = err?.error?.detail;

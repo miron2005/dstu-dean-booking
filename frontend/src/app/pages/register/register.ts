@@ -48,7 +48,6 @@ export class Register implements OnInit {
     });
   }
 
-  // Проверка ФИО: минимум два слова, только буквы и дефис
   get isFullNameInvalid(): boolean {
     const words = this.fullName.trim().split(/\s+/);
 
@@ -59,7 +58,6 @@ export class Register implements OnInit {
     return !words.every((word) => /^[\p{L}]+(?:-[\p{L}]+)*$/u.test(word));
   }
 
-  // Проверка электронной почты
   get isEmailInvalid(): boolean {
     const value = this.email.trim();
 
@@ -69,7 +67,6 @@ export class Register implements OnInit {
     );
   }
 
-  // Проверка совпадения паролей
   get passwordsDoNotMatch(): boolean {
     return (
       this.confirmPassword.length > 0 &&

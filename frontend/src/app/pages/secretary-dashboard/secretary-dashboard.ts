@@ -56,7 +56,6 @@ export class SecretaryDashboard implements OnInit {
         this.user = user;
         this.cdr.detectChanges();
 
-        // Загружаем список деканов и периоды приёма
         this.loadDeans();
         this.loadPeriods();
       },
@@ -67,7 +66,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Только актуальные периоды приёма
   get visiblePeriods(): ReceptionPeriod[] {
     const currentTime = Date.now();
 
@@ -78,7 +76,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Количество активных и ещё не завершившихся периодов
   get activePeriodsCount(): number {
     const currentTime = Date.now();
 
@@ -93,14 +90,12 @@ export class SecretaryDashboard implements OnInit {
     }).length;
   }
 
-  // Количество отменённых периодов
   get cancelledPeriodsCount(): number {
     return this.periods.filter(
       (period) => period.status === 'cancelled',
     ).length;
   }
 
-  // Количество свободных мест в актуальных периодах
   get freePlacesCount(): number {
     return this.visiblePeriods.reduce(
       (sum, period) => sum + Number(period.free_places || 0),
@@ -108,7 +103,6 @@ export class SecretaryDashboard implements OnInit {
     );
   }
 
-  // Загрузка списка деканов факультета
   loadDeans(): void {
     this.loadingDeans = true;
     this.deansErrorMessage = '';
@@ -130,7 +124,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Получение ФИО декана для карточки периода
   getDeanName(period: ReceptionPeriod): string {
     if (period.dean_name) {
       return period.dean_name;
@@ -143,7 +136,6 @@ export class SecretaryDashboard implements OnInit {
     return dean?.full_name || 'Неизвестный декан';
   }
 
-  // Загрузка периодов
   loadPeriods(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -165,7 +157,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Создание или редактирование периода
   submitForm(): void {
     this.errorMessage = '';
     this.successMessage = '';
@@ -235,12 +226,9 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Заполнение формы данными выбранного периода
   editPeriod(period: ReceptionPeriod): void {
     this.editingId = period.id;
 
-    // Если декана уже нет среди активных, но его ФИО
-    // присутствует в периоде, добавляем его для отображения
     const existingDean = this.deans.find(
       (dean) => dean.id === period.dean_id,
     );
@@ -273,7 +261,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Отмена периода
   cancelPeriod(period: ReceptionPeriod): void {
     const confirmed = window.confirm(
       'Вы действительно хотите отменить этот период приёма?',
@@ -301,7 +288,6 @@ export class SecretaryDashboard implements OnInit {
     });
   }
 
-  // Сброс формы
   resetForm(): void {
     this.editingId = null;
 
@@ -313,13 +299,11 @@ export class SecretaryDashboard implements OnInit {
     };
   }
 
-  // Выход из системы
   logout(): void {
     this.api.logout();
     this.router.navigate(['/login']);
   }
 
-  // Название статуса
   getStatusLabel(status: string): string {
     const statuses: Record<string, string> = {
       open: 'Активен',
@@ -332,12 +316,10 @@ export class SecretaryDashboard implements OnInit {
     return statuses[status] || status;
   }
 
-  // CSS-класс статуса
   getStatusClass(status: string): string {
     return status === 'open' ? 'active' : status;
   }
 
-  // Преобразование даты для input datetime-local
   private toLocalDateTime(value: string): string {
     const date = new Date(value);
     const offset = date.getTimezoneOffset();

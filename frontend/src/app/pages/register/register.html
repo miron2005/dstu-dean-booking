@@ -29,7 +29,6 @@
         #registerForm="ngForm"
         novalidate
       >
-        <!-- ФИО -->
         <div class="form-group">
           <label for="full_name">ФИО</label>
 
@@ -57,7 +56,6 @@
           }
         </div>
 
-        <!-- Электронная почта -->
         <div class="form-group">
           <label for="email">Электронная почта</label>
 
@@ -85,7 +83,6 @@
           }
         </div>
 
-        <!-- Факультет -->
         <div class="form-group">
           <label for="faculty">Факультет</label>
 
@@ -113,7 +110,6 @@
           }
         </div>
 
-        <!-- Пароль -->
         <div class="form-group">
           <label for="password">Пароль</label>
 
@@ -140,7 +136,6 @@
           }
         </div>
 
-        <!-- Повтор пароля -->
         <div class="form-group">
           <label for="confirm_password">Повторите пароль</label>
 
@@ -165,7 +160,6 @@
           }
         </div>
 
-        <!-- Ошибки сервера -->
         @if (errorMessage || emailServerError) {
           <p class="form-error">
             {{ emailServerError || errorMessage }}

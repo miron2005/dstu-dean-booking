@@ -63,7 +63,6 @@ export class DeanDashboard implements OnInit {
     this.userLoading = true;
     this.errorMessage = '';
 
-    // Загружаем профиль пользователя
     this.api.getMe().subscribe({
       next: (user) => {
         this.user = user;
@@ -93,7 +92,6 @@ export class DeanDashboard implements OnInit {
       },
     });
 
-    // Загружаем приёмные периоды
     this.api.getPeriods().subscribe({
       next: (periods) => {
         this.periods = periods;
@@ -276,12 +274,10 @@ export class DeanDashboard implements OnInit {
     return labels[status] ?? status;
   }
 
-  // Идентификация приёмных периодов в списке
   trackByPeriodId(index: number, period: ReceptionPeriod): number {
     return period.id;
   }
 
-  // Идентификация записей студентов в очереди
   trackByQueueId(index: number, appointment: QueueItem): number {
     return appointment.id;
   }

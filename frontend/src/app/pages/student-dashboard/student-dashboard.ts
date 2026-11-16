@@ -46,7 +46,6 @@ export class StudentDashboard implements OnInit {
       return;
     }
 
-    // Загружаем данные пользователя
     this.api.getMe().subscribe({
       next: (user) => {
         console.log('2. Получены данные пользователя:', user);
@@ -74,7 +73,6 @@ export class StudentDashboard implements OnInit {
       },
     });
 
-    // Загружаем записи студента
     this.api.getMyAppointments().subscribe({
       next: (appointments) => {
         console.log('Записи студента получены:', appointments);
@@ -89,7 +87,6 @@ export class StudentDashboard implements OnInit {
       },
     });
 
-    // Загружаем уведомления
     this.api.getNotifications().subscribe({
       next: (notifications) => {
         const readIds = this.getReadNotificationIds();
@@ -112,7 +109,6 @@ export class StudentDashboard implements OnInit {
       },
     });
 
-    // Загружаем периоды приёма
     this.api.getPeriods().subscribe({
       next: (periods) => {
         console.log('Периоды приёма получены:', periods);
@@ -126,7 +122,6 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  // Получаем список ID прочитанных уведомлений
   private getReadNotificationIds(): number[] {
     const saved = localStorage.getItem(this.readNotificationsKey);
 
@@ -149,7 +144,6 @@ export class StudentDashboard implements OnInit {
     }
   }
 
-  // Сохраняем прочитанные уведомления
   private saveReadNotificationIds(ids: number[]): void {
     localStorage.setItem(
       this.readNotificationsKey,
@@ -157,7 +151,6 @@ export class StudentDashboard implements OnInit {
     );
   }
 
-  // Отмечаем одно уведомление как прочитанное
   markNotificationAsRead(notification: StudentNotification): void {
     if (notification.read_at !== null) {
       return;
@@ -175,7 +168,6 @@ export class StudentDashboard implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Отмечаем все уведомления как прочитанные
   markAllNotificationsAsRead(): void {
     const readIds = this.getReadNotificationIds();
 
@@ -194,13 +186,11 @@ export class StudentDashboard implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Открываем уведомления через кнопку сверху
   openNotifications(): void {
     this.markAllNotificationsAsRead();
     this.scrollToNotifications();
   }
 
-  // Плавная прокрутка к уведомлениям
   scrollToNotifications(): void {
     document.getElementById('notifications')?.scrollIntoView({
       behavior: 'smooth',
@@ -208,7 +198,6 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  // Плавная прокрутка к профилю
   scrollToProfile(): void {
     document.getElementById('profile')?.scrollIntoView({
       behavior: 'smooth',
@@ -216,7 +205,6 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  // Плавная прокрутка к записям
   scrollToAppointments(): void {
     document.getElementById('appointments')?.scrollIntoView({
       behavior: 'smooth',
@@ -237,7 +225,6 @@ export class StudentDashboard implements OnInit {
     return this.appointments.length;
   }
 
-  // Показываем только записи, приём по которым ещё не закончился
   get visibleAppointments(): StudentAppointment[] {
     const currentTime = Date.now();
 

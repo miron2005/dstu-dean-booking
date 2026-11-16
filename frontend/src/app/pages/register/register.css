@@ -130,8 +130,6 @@
   cursor: pointer;
 }
 
-/* Ошибки валидации */
-
 .form-group input.invalid-input,
 .form-group select.invalid-input {
   border-color: #d9534f;
