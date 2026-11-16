@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, status
 
@@ -19,9 +19,10 @@ def get_periods(
     session: SessionDep,
     day: Annotated[date | None, Query(alias="date")] = None,
     only_available: bool = False,
+    scope: Literal["upcoming", "past", "all"] = "upcoming",
 ):
     dean_id = user.id if user.role == "dean" else None
-    periods = PeriodRepository.get_all(user.faculty_id, session, day, dean_id)
+    periods = PeriodRepository.get_all(user.faculty_id, session, day, dean_id, scope)
     result = [service.to_out(session, period) for period in periods]
     if only_available:
         result = [p for p in result if p.status == "open" and p.free_places > 0]
