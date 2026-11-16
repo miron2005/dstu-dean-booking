@@ -447,22 +447,34 @@ td small {
   padding: 7px 9px;
   font-size: 10px;
 }
-
 .status {
-  display: inline-block;
-  padding: 6px 9px;
-  border-radius: 20px;
-  background: #e9f5ed;
-  color: #43835a;
-  font-size: 10px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border: 1px solid #d9dde3;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
   white-space: nowrap;
 }
 
-.status.inactive {
-  background: #fceaea;
-  color: #b85a5a;
+.status::before {
+  content: '';
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2f855a;
 }
+.status.inactive::before {
+  background: #9ca3af;
+}
+
+
 
 .empty-cell {
   padding: 35px;

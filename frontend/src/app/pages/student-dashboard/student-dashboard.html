@@ -189,7 +189,7 @@
                   Тема: {{ getTopicTitle(appointment) }}
                 </p>
 
-                <span class="appointment-status">
+                <span class="appointment-status" [ngClass]="'s-' + appointment.status">
                   {{ getStatusLabel(appointment.status) }}
                 </span>
               </div>
@@ -245,7 +245,7 @@
                     </p>
                   </div>
 
-                  <div class="appointment-card-status">
+                  <div class="appointment-card-status" [ngClass]="'s-' + appointment.status">
                     {{ getStatusLabel(appointment.status) }}
                   </div>
 

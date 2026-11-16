@@ -148,7 +148,7 @@
         >
           <div class="period-card-top">
             <span class="period-label">ПРИЁМНЫЙ ПЕРИОД</span>
-            <span class="period-status">{{ getPeriodStatusLabel(period.status) }}</span>
+            <span class="period-status" [class.is-cancelled]="period.status === 'cancelled'">{{ getPeriodStatusLabel(period.status) }}</span>
           </div>
 
           <strong class="period-date">

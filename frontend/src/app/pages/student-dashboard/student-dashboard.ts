@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 
@@ -23,7 +24,7 @@ import { CallAlert } from '../../shared/call-alert';
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [RouterLink, FormsModule, RoleAvatar, CallAlert],
+  imports: [RouterLink, FormsModule, NgClass, RoleAvatar, CallAlert],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
