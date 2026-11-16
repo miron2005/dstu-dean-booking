@@ -18,6 +18,13 @@ class Appointment(Model):
             unique=True,
             postgresql_where="status <> 'cancelled'",
         ),
+        Index(
+            "uq_appointment_slot",
+            "period_id",
+            "slot_start",
+            unique=True,
+            postgresql_where="status <> 'cancelled'",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -26,6 +33,7 @@ class Appointment(Model):
     topic_id: Mapped[int] = mapped_column(ForeignKey("appeal_topics.id"))
     question: Mapped[str] = mapped_column(Text)
     queue_number: Mapped[int] = mapped_column(Integer)
+    slot_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     result_comment: Mapped[str | None] = mapped_column(Text)

@@ -4,3 +4,6 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://deanery:deanery@l
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_MINUTES = 60 * 12
+
+SLOT_CHOICES = (10, 15, 20, 30)
+BOOKING_LEAD_MINUTES = 10
