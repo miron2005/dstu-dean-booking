@@ -1,5 +1,5 @@
 
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -16,6 +16,7 @@ import { ApiService, Faculty } from '../../core/api';
 export class Register implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   faculties: Faculty[] = [];
 
@@ -37,10 +38,12 @@ export class Register implements OnInit {
       next: (faculties) => {
         this.faculties = faculties;
         this.loadingFaculties = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Не удалось загрузить список факультетов.';
         this.loadingFaculties = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -75,6 +78,10 @@ export class Register implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.submitted = true;
     this.errorMessage = '';
     this.emailServerError = '';
@@ -117,6 +124,7 @@ export class Register implements OnInit {
         this.password = '';
         this.confirmPassword = '';
 
+        this.cdr.detectChanges();
         this.router.navigate(['/login']);
       },
       error: (error: HttpErrorResponse) => {
@@ -126,7 +134,7 @@ export class Register implements OnInit {
 
         if (typeof detail === 'string') {
           if (detail.toLowerCase().includes('почта уже занята')) {
-            this.emailServerError = 'Аккаунт с такой почтой уже существует.';
+            this.emailServerError = detail;
           } else {
             this.errorMessage = detail;
           }
@@ -134,6 +142,8 @@ export class Register implements OnInit {
           this.errorMessage =
             'Не удалось зарегистрироваться. Проверьте введённые данные.';
         }
+
+        this.cdr.detectChanges();
       },
     });
   }
