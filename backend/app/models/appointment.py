@@ -30,7 +30,7 @@ class Appointment(Model):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     period_id: Mapped[int] = mapped_column(ForeignKey("reception_periods.id"))
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    topic_id: Mapped[int] = mapped_column(ForeignKey("appeal_topics.id"))
+    topic_id: Mapped[int | None] = mapped_column(ForeignKey("appeal_topics.id"))
     question: Mapped[str] = mapped_column(Text)
     queue_number: Mapped[int] = mapped_column(Integer)
     slot_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
